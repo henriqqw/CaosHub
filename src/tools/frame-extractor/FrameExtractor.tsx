@@ -1,3 +1,4 @@
+import { useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useFrameExtractor } from './hooks/useFrameExtractor'
 import { VideoUpload } from './components/VideoUpload'
@@ -9,6 +10,7 @@ import { Button } from '../../components/ui/Button'
 export function FrameExtractor() {
   const {
     phase,
+    videoFile,
     videoMeta,
     config,
     setConfig,
@@ -19,6 +21,17 @@ export function FrameExtractor() {
     cancel,
     reset,
   } = useFrameExtractor()
+
+  // Stable object URL for video preview — revoked on file change or unmount
+  const videoUrl = useMemo(
+    () => (videoFile ? URL.createObjectURL(videoFile) : null),
+    [videoFile],
+  )
+  useEffect(() => {
+    return () => {
+      if (videoUrl) URL.revokeObjectURL(videoUrl)
+    }
+  }, [videoUrl])
 
   return (
     <motion.div
@@ -41,20 +54,32 @@ export function FrameExtractor() {
       )}
 
       {/* Phase: config */}
-      {phase === 'config' && videoMeta && (
-        <ExtractionConfigPanel
-          config={config}
-          onChange={setConfig}
-          meta={videoMeta}
-          onStart={startExtraction}
-          onBack={reset}
-        />
+      {phase === 'config' && videoMeta && videoFile && videoUrl && (
+        <div className="space-y-4">
+          {/* Video player */}
+          <video
+            src={videoUrl}
+            controls
+            className="w-full rounded-xl border border-border bg-black"
+            style={{ maxHeight: '360px' }}
+          />
+
+          {/* Config panel */}
+          <ExtractionConfigPanel
+            config={config}
+            onChange={setConfig}
+            meta={videoMeta}
+            filename={videoFile.name}
+            onStart={startExtraction}
+            onReset={reset}
+          />
+        </div>
       )}
 
       {/* Phase: processing */}
       {phase === 'processing' && (
-        <div className="space-y-4">
-          <ProgressBar value={progress} label="Extracting frames" />
+        <div className="space-y-4 rounded-xl bg-bg-secondary border border-border p-6">
+          <ProgressBar value={progress} label="Extracting frames…" />
           <Button variant="ghost" onClick={cancel} className="text-sm">
             Cancel
           </Button>

@@ -6,7 +6,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 ).toString()
 
 export async function renderThumbnail(buffer: ArrayBuffer): Promise<string> {
-  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise
+  // Copy the buffer — pdfjs-dist transfers the ArrayBuffer to its Web Worker,
+  // which would neuter the original buffer stored in React state and break merging.
+  const copy = buffer.slice(0)
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(copy) }).promise
   const page = await pdf.getPage(1)
   const viewport = page.getViewport({ scale: 1 })
   const scale = 160 / viewport.width

@@ -21,11 +21,12 @@ export function MergePDF() {
     try {
       const buffers = files.map(f => f.buffer)
       const bytes = await mergePdfs(buffers)
-      const blob = new Blob([bytes as unknown as ArrayBuffer], { type: 'application/pdf' })
+      const blob = new Blob([new Uint8Array(bytes)], { type: 'application/pdf' })
       downloadBlob(blob, 'merged.pdf')
       toast({ type: 'success', message: `Merged ${files.length} PDFs successfully.` })
-    } catch {
-      toast({ type: 'error', message: 'Failed to merge PDFs. Check that all files are valid.' })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      toast({ type: 'error', message: `Merge failed: ${msg}` })
     } finally {
       setMerging(false)
     }

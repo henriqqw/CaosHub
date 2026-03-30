@@ -5,7 +5,7 @@ import { Home } from './pages/Home'
 
 const MergePDF = lazy(() => import('./tools/merge-pdf/MergePDF').then(m => ({ default: m.MergePDF })))
 const FrameExtractor = lazy(() => import('./tools/frame-extractor/FrameExtractor').then(m => ({ default: m.FrameExtractor })))
-const WebPConverter = lazy(() => import('./tools/webp-converter/WebPConverter').then(m => ({ default: m.WebPConverter })))
+const ImageConverter = lazy(() => import('./tools/image-converter/ImageConverter').then(m => ({ default: m.ImageConverter })))
 
 function PageLoader() {
   return (
@@ -23,7 +23,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="/tools/merge-pdf" element={<Suspense fallback={<PageLoader />}><MergePDF /></Suspense>} />
           <Route path="/tools/frame-extractor" element={<Suspense fallback={<PageLoader />}><FrameExtractor /></Suspense>} />
-          <Route path="/tools/webp-converter" element={<Suspense fallback={<PageLoader />}><WebPConverter /></Suspense>} />
+          <Route path="/tools/image-converter" element={<Suspense fallback={<PageLoader />}><ImageConverter /></Suspense>} />
         </Route>
       </Routes>
     </BrowserRouter>

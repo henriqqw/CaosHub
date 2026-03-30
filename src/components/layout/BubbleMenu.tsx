@@ -7,7 +7,7 @@ const navItems = [
   { to: '/', label: 'Home', icon: Home, exact: true },
   { to: '/tools/merge-pdf', label: 'MergePDF', icon: FileText, exact: false },
   { to: '/tools/frame-extractor', label: 'FrameExtractor', icon: Film, exact: false },
-  { to: '/tools/webp-converter', label: 'WebP', icon: ImageIcon, exact: false },
+  { to: '/tools/image-converter', label: 'Image Converter', icon: ImageIcon, exact: false },
 ]
 
 export function BubbleMenu() {

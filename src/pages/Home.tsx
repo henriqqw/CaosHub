@@ -8,7 +8,6 @@ interface Tool {
   name: string
   description: string
   route: string
-  accent: string
 }
 
 const tools: Tool[] = [
@@ -17,21 +16,18 @@ const tools: Tool[] = [
     name: 'MergePDF',
     description: 'Combine multiple PDF files into one. Drag, reorder, and merge — all in your browser.',
     route: '/tools/merge-pdf',
-    accent: 'text-accent',
   },
   {
     icon: Film,
     name: 'FrameExtractor',
     description: 'Extract frames from any video file as PNG or JPEG. Export as individual files or a ZIP archive.',
     route: '/tools/frame-extractor',
-    accent: 'text-accent',
   },
   {
     icon: ImageIcon,
-    name: 'WebP Converter',
-    description: 'Convert JPG, PNG, and other images to WebP format with adjustable quality and batch support.',
-    route: '/tools/webp-converter',
-    accent: 'text-accent',
+    name: 'Image Converter',
+    description: 'Convert images between JPEG, PNG, and WebP. Batch processing with size comparison and ZIP export.',
+    route: '/tools/image-converter',
   },
 ]
 
