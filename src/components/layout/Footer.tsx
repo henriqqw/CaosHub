@@ -2,25 +2,49 @@ import { Link } from 'react-router-dom'
 import { Github, Twitter, MessageCircle, Instagram, Linkedin, Mail, Heart } from 'lucide-react'
 
 const tools = [
-  { label: 'Home', to: '/' },
-  { label: 'MergePDF', to: '/tools/merge-pdf' },
-  { label: 'FrameExtractor', to: '/tools/frame-extractor' },
-  { label: 'Image Converter', to: '/tools/image-converter' },
+  // PDF
+  { label: 'MergePDF',                  to: '/tools/merge-pdf' },
+  { label: 'PDF para Imagens',          to: '/tools/pdf-to-images' },
+  { label: 'Dividir PDF',               to: '/tools/pdf-splitter' },
+  { label: 'Proteger PDF',              to: '/tools/pdf-protect' },
+  // Imagem
+  { label: 'Image Converter',           to: '/tools/image-converter' },
+  { label: 'Image Compressor',          to: '/tools/image-compressor' },
+  { label: 'Color Palette',             to: '/tools/color-palette' },
+  { label: 'Remover Fundo',             to: '/tools/background-removal' },
+  { label: 'Editor de Imagem',          to: '/tools/image-editor' },
+  { label: 'Favicon Generator',         to: '/tools/favicon-generator' },
+  // Vídeo / Áudio
+  { label: 'Frame Extractor',           to: '/tools/frame-extractor' },
+  { label: 'Converter Vídeo',           to: '/tools/video-converter' },
+  { label: 'Cortar Vídeo',              to: '/tools/video-trimmer' },
+  { label: 'Converter Áudio',           to: '/tools/audio-converter' },
+  // Texto
+  { label: 'Contador de Caracteres',    to: '/tools/character-counter' },
+  { label: 'Markdown Preview',          to: '/tools/markdown-preview' },
+  // Utilidade
+  { label: 'QR Code',                   to: '/tools/qr-code' },
+  { label: 'Gerador de Senhas',         to: '/tools/password-generator' },
+  // Dev
+  { label: 'JSON Formatter',            to: '/tools/json-formatter' },
+  { label: 'Hash Generator',            to: '/tools/hash-generator' },
+  { label: 'JWT Decoder',               to: '/tools/jwt-decoder' },
+  { label: 'UUID Generator',            to: '/tools/uuid-generator' },
+  { label: 'Encoder',                   to: '/tools/encoder' },
 ]
 
 const socialLinks = [
-  { icon: Github, href: 'https://github.com/henriqqw/CaosHub', label: 'GitHub' },
-  { icon: Twitter, href: 'https://twitter.com/caosdev', label: 'Twitter' },
-  { icon: MessageCircle, href: '#', label: 'Discord' },
-  { icon: Instagram, href: '#', label: 'Instagram' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { icon: Mail, href: 'mailto:contato@caosdev.com', label: 'Email' },
+  { icon: Github,        href: 'https://github.com/henriqqw/CaosHub', label: 'GitHub' },
+  { icon: Twitter,       href: 'https://twitter.com/caosdev',         label: 'Twitter' },
+  { icon: MessageCircle, href: '#',                                    label: 'Discord' },
+  { icon: Instagram,     href: '#',                                    label: 'Instagram' },
+  { icon: Linkedin,      href: '#',                                    label: 'LinkedIn' },
+  { icon: Mail,          href: 'mailto:contato@caosdev.com',           label: 'Email' },
 ]
 
 export function Footer() {
   return (
     <footer className="relative z-10 border-t border-border bg-bg-secondary mt-auto">
-      {/* Main content */}
       <div className="max-w-6xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
 
@@ -40,17 +64,17 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Tools */}
+          {/* Tools — 2 columns */}
           <div className="space-y-3">
             <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-widest">
-              Tools
+              Ferramentas
             </h3>
-            <nav className="flex flex-col gap-2">
+            <nav className="grid grid-cols-2 gap-x-4 gap-y-2">
               {tools.map(t => (
                 <Link
                   key={t.to}
                   to={t.to}
-                  className="text-sm text-text-secondary hover:text-text-primary transition-colors duration-150 w-fit"
+                  className="text-sm text-text-secondary hover:text-text-primary transition-colors duration-150 truncate"
                 >
                   {t.label}
                 </Link>

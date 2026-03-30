@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom'
-import { BubbleMenu } from './BubbleMenu'
+import { DesktopSidebar, MobileSidebar } from './Sidebar'
 import { Footer } from './Footer'
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col">
-      {/* Global grid background — fixed, covers full page */}
+    <div className="min-h-screen bg-bg-primary flex">
+      {/* Global grid background */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -15,15 +15,16 @@ export function Layout() {
         }}
       />
 
-      {/* Grid bottom fade — above grid (z-0), below content & footer (z-10) */}
-      <div className="fixed bottom-0 left-0 right-0 h-48 pointer-events-none z-[5] bg-gradient-to-b from-transparent to-bg-primary" />
+      <DesktopSidebar />
+      <MobileSidebar />
 
-      <BubbleMenu />
-      <main className="relative z-10 flex-1 pt-20">
-        <Outlet />
-      </main>
-
-      <Footer />
+      {/* Main — offset by sidebar width on desktop */}
+      <div className="flex flex-col flex-1 min-w-0 lg:ml-52">
+        <main className="relative z-10 flex-1 pt-14 lg:pt-0">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </div>
   )
 }

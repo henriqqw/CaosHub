@@ -19,9 +19,17 @@ CaosHub is an all-client-side web tool hub. No backend, no API. Every tool runs 
 | Routing | React Router v6 |
 | Animation | Framer Motion |
 | Icons | Lucide React |
-| PDF | pdf-lib + pdfjs-dist |
+| PDF read/write | pdf-lib + pdfjs-dist |
+| PDF encryption | @cantoo/pdf-lib (fork of pdf-lib with encrypt()) |
 | Drag & Drop | @hello-pangea/dnd |
 | ZIP | jszip + file-saver |
+| QR Code | qrcode |
+| SEO | react-helmet-async |
+| Analytics | @vercel/analytics |
+| Background removal | @imgly/background-removal (WASM + AI, CDN) |
+| Video / Audio | @ffmpeg/ffmpeg + @ffmpeg/util (WASM, CDN core) |
+| Markdown | marked |
+| MD5 hashing | spark-md5 |
 
 ---
 
@@ -41,7 +49,7 @@ CaosHub is an all-client-side web tool hub. No backend, no API. Every tool runs 
 | Warning | `#FFC857` |
 
 Tailwind classes: `bg-bg-primary`, `bg-surface`, `text-accent`, `border-border`, etc.
-Font: Inter (Google Fonts). Icons: Lucide React (consistent stroke, never decorative-only).
+Font: Inter (Google Fonts). Icons: Lucide React.
 
 ---
 
@@ -50,57 +58,132 @@ Font: Inter (Google Fonts). Icons: Lucide React (consistent stroke, never decora
 ```
 src/
 ├── components/
-│   ├── layout/          # BubbleMenu, Layout
-│   └── ui/              # Button, Badge, FileUploadZone, Toast, ProgressBar
+│   ├── layout/          # DesktopSidebar, MobileSidebar, Layout, Footer
+│   └── ui/              # Button, FileUploadZone, Toast, ProgressBar, Badge
 ├── hooks/               # useToast, useFileUpload
-├── lib/                 # utils.ts (cn, formatBytes, downloadBlob)
+├── lib/                 # utils.ts (cn, formatBytes, downloadBlob, generateId, dataUrlToBlob)
 ├── pages/               # Home.tsx
 └── tools/
-    ├── merge-pdf/       # MergePDF tool (pdf-lib + pdfjs-dist)
-    ├── frame-extractor/ # FrameExtractor tool (Canvas API + jszip)
-    └── webp-converter/  # WebPConverter tool (Canvas API)
+    ├── merge-pdf/
+    ├── pdf-to-images/
+    ├── pdf-splitter/
+    ├── pdf-protect/          # @cantoo/pdf-lib
+    ├── image-converter/
+    ├── image-compressor/
+    ├── color-palette/
+    ├── background-removal/   # @imgly/background-removal (WASM AI, CDN)
+    ├── image-editor/         # resize / flip / rotate / crop — Canvas API
+    ├── favicon-generator/    # multi-size PNGs + JSZip
+    ├── frame-extractor/
+    ├── video-converter/      # FFmpeg.wasm (CDN core)
+    ├── video-trimmer/        # FFmpeg.wasm (stream copy)
+    ├── audio-converter/      # FFmpeg.wasm
+    ├── character-counter/
+    ├── markdown-preview/     # marked
+    ├── qr-code/
+    ├── password-generator/
+    ├── json-formatter/
+    ├── hash-generator/       # crypto.subtle + spark-md5
+    ├── jwt-decoder/
+    ├── uuid-generator/
+    └── encoder/              # Base64 / URL / HTML
 ```
 
-Each tool is self-contained: `ToolName.tsx` (page) + `components/` + `hooks/` + `utils/`.
+---
+
+## Tool Registry (23 tools)
+
+### PDF
+| Tool | Route |
+|------|-------|
+| MergePDF | `/tools/merge-pdf` |
+| PdfToImages | `/tools/pdf-to-images` |
+| PdfSplitter | `/tools/pdf-splitter` |
+| PdfProtect | `/tools/pdf-protect` |
+
+### Imagem
+| Tool | Route |
+|------|-------|
+| ImageConverter | `/tools/image-converter` |
+| ImageCompressor | `/tools/image-compressor` |
+| ColorPalette | `/tools/color-palette` |
+| BackgroundRemoval | `/tools/background-removal` |
+| ImageEditor | `/tools/image-editor` |
+| FaviconGenerator | `/tools/favicon-generator` |
+
+### Vídeo / Áudio
+| Tool | Route |
+|------|-------|
+| FrameExtractor | `/tools/frame-extractor` |
+| VideoConverter | `/tools/video-converter` |
+| VideoTrimmer | `/tools/video-trimmer` |
+| AudioConverter | `/tools/audio-converter` |
+
+### Texto
+| Tool | Route |
+|------|-------|
+| CharacterCounter | `/tools/character-counter` |
+| MarkdownPreview | `/tools/markdown-preview` |
+
+### Utilidade
+| Tool | Route |
+|------|-------|
+| QRCodeTool | `/tools/qr-code` |
+| PasswordGenerator | `/tools/password-generator` |
+
+### Dev
+| Tool | Route |
+|------|-------|
+| JsonFormatter | `/tools/json-formatter` |
+| HashGenerator | `/tools/hash-generator` |
+| JwtDecoder | `/tools/jwt-decoder` |
+| UuidGenerator | `/tools/uuid-generator` |
+| Encoder | `/tools/encoder` |
 
 ---
 
-## Tool Registry
+## Sidebar Structure
 
-| Tool | Route | Description |
-|------|-------|-------------|
-| MergePDF | `/tools/merge-pdf` | Merge multiple PDFs client-side (pdf-lib) |
-| FrameExtractor | `/tools/frame-extractor` | Extract video frames as PNG/JPEG/ZIP (Canvas API) |
-| WebPConverter | `/tools/webp-converter` | Convert images to WebP (Canvas API) |
+```
+Home
+─────────────────
+PDF
+  MergePDF · PDF→Imagens · Dividir PDF · Proteger PDF
+Imagem
+  Converter · Comprimir · Paleta · Remover Fundo · Editar · Favicon
+Vídeo / Áudio
+  Frame Extractor · Converter Vídeo · Cortar Vídeo · Converter Áudio
+Texto
+  Contador · Markdown
+Utilidade
+  QR Code · Senhas
+Dev
+  JSON · Hash · JWT · UUID · Encoder
+```
 
 ---
 
-## Conventions
+## Critical Conventions
 
-- **No global state** — no Redux, no Context. Each tool manages its own state via local `useState` + custom hooks.
-- **Shared components** live in `src/components/ui/` — reuse before creating new.
-- **Tool logic** is isolated in `src/tools/<tool>/utils/` — pure functions, no React deps.
-- **Hooks** in `src/tools/<tool>/hooks/` wrap tool logic for component consumption.
-- **Downloads** use `downloadBlob()` from `src/lib/utils.ts`.
+- **No global state** — each tool manages its own state via `useState` + custom hooks.
+- **Shared components** in `src/components/ui/` — reuse before creating new.
 - TypeScript strict mode. No `any` unless unavoidable.
-- Tailwind utility classes only — no inline styles, no CSS modules (except `index.css` for tokens).
-- Framer Motion: 150–250ms, ease-in-out. No bounce, no elastic, no long transitions.
-
----
-
-## SOLID Reminders
-
-- **S** — Each component/utility has one responsibility.
-- **O** — UI components accept variant props instead of being forked.
-- **L** — Tools can be swapped out independently.
-- **I** — Hooks/utils expose minimal interfaces.
-- **D** — Tools depend on abstractions (FileUploadZone, downloadBlob) not concretions.
+- Tailwind utility classes only — no inline styles except where Tailwind can't do it.
+- Framer Motion: 150–250ms, ease-in-out. No bounce, no elastic.
+- FFmpeg WASM core loads from CDN (`unpkg.com/@ffmpeg/core@0.12.6`) — never bundled.
+- Background removal AI model loads from IMG.LY CDN on first use (~50MB, cached after).
+- **Uint8Array → Blob fix**: always cast `(bytes as Uint8Array).buffer as ArrayBuffer` when passed to `new Blob([...])` — required by TypeScript strict mode.
+- PDF encryption: use `@cantoo/pdf-lib` (not `pdf-lib`) — pdf-lib v1.x has no encrypt().
 
 ---
 
 ## Adding a New Tool
 
-1. Create `src/tools/<tool-name>/` with: `ToolName.tsx`, `components/`, `hooks/`, `utils/`
-2. Add route in `src/App.tsx`
-3. Add card to `src/pages/Home.tsx` tool registry array
-4. Update this file's Tool Registry table
+1. Create `src/tools/<tool-name>/ToolName.tsx`
+2. Add lazy route in `src/App.tsx`
+3. Add card to `src/pages/Home.tsx` tools array + update count
+4. Add `<Helmet>` SEO block (title, description, canonical, og:*, twitter:*)
+5. Add NavLink + icon to `src/components/layout/Sidebar.tsx` under correct category
+6. Add link to `src/components/layout/Footer.tsx`
+7. Add URL to `public/sitemap.xml`
+8. Update this file's Tool Registry table
