@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark rounded background -->
+  <rect width="32" height="32" rx="7" fill="#111111"/>
+  <!-- "C" arc: from top-right to bottom-right going counterclockwise (through left) -->
+  <path d="M 23 11 A 8.5 8.5 0 1 0 23 21"
+        stroke="#FF2222" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+</svg>

@@ -1,4 +1,5 @@
 import { useMemo, useEffect } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useFrameExtractor } from './hooks/useFrameExtractor'
 import { VideoUpload } from './components/VideoUpload'
@@ -34,11 +35,22 @@ export function FrameExtractor() {
   }, [videoUrl])
 
   return (
-    <motion.div
+    <>
+      <Helmet>
+        <title>FrameExtractor — Extraia frames de vídeos no navegador | CaosHub</title>
+        <meta name="description" content="Extraia frames de qualquer vídeo diretamente no navegador. Exporte como PNG, JPEG ou ZIP. Sem upload para servidores, 100% privado e gratuito." />
+        <link rel="canonical" href="https://caoshub.vercel.app/tools/frame-extractor" />
+        <meta property="og:url" content="https://caoshub.vercel.app/tools/frame-extractor" />
+        <meta property="og:title" content="FrameExtractor — Extraia frames de vídeos no navegador | CaosHub" />
+        <meta property="og:description" content="Extraia frames de qualquer vídeo diretamente no navegador. Exporte como PNG, JPEG ou ZIP. Sem upload, 100% privado e gratuito." />
+        <meta name="twitter:title" content="FrameExtractor — Extraia frames de vídeos no navegador | CaosHub" />
+        <meta name="twitter:description" content="Extraia frames de qualquer vídeo diretamente no navegador. Exporte como PNG, JPEG ou ZIP. Sem upload, 100% privado e gratuito." />
+      </Helmet>
+      <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="max-w-2xl mx-auto space-y-6"
+      className="max-w-2xl mx-auto px-4 pb-12 space-y-6"
     >
       {/* Header */}
       <div>
@@ -91,5 +103,6 @@ export function FrameExtractor() {
         <FrameResults frames={frames} format={config.format} onReset={reset} />
       )}
     </motion.div>
+    </>
   )
 }

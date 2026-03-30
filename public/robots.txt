@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://caoshub.vercel.app/sitemap.xml

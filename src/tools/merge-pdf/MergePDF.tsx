@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { Merge, Plus } from 'lucide-react'
 import { usePdfFiles } from './hooks/usePdfFiles'
@@ -33,11 +34,22 @@ export function MergePDF() {
   }
 
   return (
-    <motion.div
+    <>
+      <Helmet>
+        <title>MergePDF — Mescle PDFs gratuitamente no navegador | CaosHub</title>
+        <meta name="description" content="Mescle múltiplos arquivos PDF em um só, diretamente no navegador. Sem upload para servidores, sem limite de arquivos, 100% gratuito e privado." />
+        <link rel="canonical" href="https://caoshub.vercel.app/tools/merge-pdf" />
+        <meta property="og:url" content="https://caoshub.vercel.app/tools/merge-pdf" />
+        <meta property="og:title" content="MergePDF — Mescle PDFs gratuitamente no navegador | CaosHub" />
+        <meta property="og:description" content="Mescle múltiplos arquivos PDF em um só, diretamente no navegador. Sem upload para servidores, 100% gratuito e privado." />
+        <meta name="twitter:title" content="MergePDF — Mescle PDFs gratuitamente no navegador | CaosHub" />
+        <meta name="twitter:description" content="Mescle múltiplos arquivos PDF em um só, diretamente no navegador. Sem upload para servidores, 100% gratuito e privado." />
+      </Helmet>
+      <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="max-w-2xl mx-auto space-y-6"
+      className="max-w-2xl mx-auto px-4 pb-12 space-y-6"
     >
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
 
@@ -93,5 +105,6 @@ export function MergePDF() {
         </div>
       )}
     </motion.div>
+    </>
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { FolderArchive } from 'lucide-react'
 import JSZip from 'jszip'
@@ -49,11 +50,22 @@ export function ImageConverter() {
   }
 
   return (
-    <motion.div
+    <>
+      <Helmet>
+        <title>Image Converter — Converta imagens para JPEG, PNG e WebP | CaosHub</title>
+        <meta name="description" content="Converta imagens entre JPEG, PNG e WebP diretamente no navegador. Sem upload para servidores, controle de qualidade, download em ZIP. 100% gratuito e privado." />
+        <link rel="canonical" href="https://caoshub.vercel.app/tools/image-converter" />
+        <meta property="og:url" content="https://caoshub.vercel.app/tools/image-converter" />
+        <meta property="og:title" content="Image Converter — Converta imagens para JPEG, PNG e WebP | CaosHub" />
+        <meta property="og:description" content="Converta imagens entre JPEG, PNG e WebP diretamente no navegador. Sem upload, controle de qualidade, download em ZIP. 100% gratuito e privado." />
+        <meta name="twitter:title" content="Image Converter — Converta imagens para JPEG, PNG e WebP | CaosHub" />
+        <meta name="twitter:description" content="Converta imagens entre JPEG, PNG e WebP diretamente no navegador. Sem upload, controle de qualidade, download em ZIP. 100% gratuito." />
+      </Helmet>
+      <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="max-w-2xl mx-auto space-y-6"
+      className="max-w-2xl mx-auto px-4 pb-12 space-y-6"
     >
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
 
@@ -146,5 +158,6 @@ export function ImageConverter() {
         </div>
       )}
     </motion.div>
+    </>
   )
 }
