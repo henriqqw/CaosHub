@@ -1,8 +1,11 @@
 import { Outlet } from 'react-router-dom'
 import { DesktopSidebar, MobileSidebar } from './Sidebar'
 import { Footer } from './Footer'
+import { useAnalytics } from '../../hooks/useAnalytics'
 
 export function Layout() {
+  useAnalytics()
+
   return (
     <div className="min-h-screen bg-bg-primary flex">
       {/* Global grid background */}
