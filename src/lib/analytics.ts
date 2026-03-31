@@ -22,7 +22,7 @@ export function track(
       visitorId,
       sessionId,
       path: window.location.pathname,
-      referrer: document.referrer || null,
+      referrer: document.referrer || '',
       metadata: metadata ?? {},
     }),
     keepalive: true,
