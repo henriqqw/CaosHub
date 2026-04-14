@@ -129,7 +129,7 @@ export function MediaDownloader() {
 
       if (networkError) {
         throw new Error(
-          `Nao foi possivel conectar ao backend. Inicie a API em ${API_BASE_CANDIDATES.join(' ou ')}`,
+          'Nao foi possivel conectar ao backend. Tente novamente em alguns instantes.',
         )
       }
 
