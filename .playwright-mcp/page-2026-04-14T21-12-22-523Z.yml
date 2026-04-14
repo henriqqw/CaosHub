@@ -1,0 +1,113 @@
+- generic [ref=e3]:
+  - button [ref=e4]:
+    - img [ref=e5]
+  - generic [ref=e6]:
+    - main [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - img [ref=e11]
+          - generic [ref=e14]:
+            - heading "Media Downloader" [level=1] [ref=e15]
+            - paragraph [ref=e16]: Cole um ou varios links publicos de midia, escolha formato e qualidade, e gere o download.
+        - generic [ref=e17]:
+          - text: URLs da midia
+          - textbox "URLs da midia" [ref=e18]:
+            - /placeholder: "https://youtube.com/watch?v=...\nhttps://www.tiktok.com/@user/video/..."
+          - paragraph [ref=e19]: "Uma URL por linha. Detectadas: 0"
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - paragraph [ref=e22]: Formato
+            - generic [ref=e23]:
+              - button "MP4 Video Baixa video com audio no mesmo arquivo." [ref=e24]:
+                - generic [ref=e25]:
+                  - img [ref=e26]
+                  - text: MP4 Video
+                - generic [ref=e29]: Baixa video com audio no mesmo arquivo.
+              - button "MP3 Audio Extrai e converte para audio MP3." [ref=e30]:
+                - generic [ref=e31]:
+                  - img [ref=e32]
+                  - text: MP3 Audio
+                - generic [ref=e35]: Extrai e converte para audio MP3.
+          - generic [ref=e36]:
+            - paragraph [ref=e37]: Qualidade
+            - generic [ref=e38]:
+              - button "Low Arquivo menor e processamento mais rapido." [ref=e39]:
+                - generic [ref=e40]: Low
+                - generic [ref=e41]: Arquivo menor e processamento mais rapido.
+              - button "Full Melhor qualidade disponivel na origem." [ref=e42]:
+                - generic [ref=e43]: Full
+                - generic [ref=e44]: Melhor qualidade disponivel na origem.
+        - generic [ref=e45]:
+          - button "Gerar download" [disabled]
+          - button "Limpar job" [disabled]
+          - button "Atualizar status" [disabled]:
+            - img
+            - text: Atualizar status
+        - generic [ref=e46]:
+          - img [ref=e47]
+          - paragraph [ref=e49]: Use apenas links e conteudos que voce possui autorizacao para baixar. Plataformas com DRM, conteudo privado, paywall ou restricoes de direitos podem falhar.
+        - generic [ref=e50]:
+          - paragraph [ref=e51]: "Preset atual: MP4 Video + Full"
+          - paragraph [ref=e52]: "Lote: ate 25 URLs por job, com download final em ZIP."
+          - paragraph [ref=e53]: Plataformas suportadas dependem da disponibilidade publica da midia e do yt-dlp.
+    - contentinfo [ref=e54]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - img [ref=e60]
+            - generic [ref=e62]: CaosHub
+          - paragraph [ref=e63]: Open source project - MIT License
+        - generic [ref=e64]:
+          - heading "Tools" [level=3] [ref=e65]
+          - navigation [ref=e66]:
+            - link "PDF Converter" [ref=e67] [cursor=pointer]:
+              - /url: /tools/pdf-converter
+            - link "MergePDF" [ref=e68] [cursor=pointer]:
+              - /url: /tools/merge-pdf
+            - link "Image Converter" [ref=e69] [cursor=pointer]:
+              - /url: /tools/image-converter
+            - link "Image Compressor" [ref=e70] [cursor=pointer]:
+              - /url: /tools/image-compressor
+            - link "Remove Background" [ref=e71] [cursor=pointer]:
+              - /url: /tools/background-removal
+            - link "Video Converter" [ref=e72] [cursor=pointer]:
+              - /url: /tools/video-converter
+            - link "Audio Converter" [ref=e73] [cursor=pointer]:
+              - /url: /tools/audio-converter
+            - link "Media Downloader" [ref=e74] [cursor=pointer]:
+              - /url: /tools/media-downloader
+            - link "Transcriber" [ref=e75] [cursor=pointer]:
+              - /url: /tools/transcriber
+            - link "QR Code" [ref=e76] [cursor=pointer]:
+              - /url: /tools/qr-code
+            - link "Password Generator" [ref=e77] [cursor=pointer]:
+              - /url: /tools/password-generator
+        - generic [ref=e78]:
+          - heading "Links" [level=3] [ref=e79]
+          - generic [ref=e80]:
+            - link "GitHub" [ref=e81] [cursor=pointer]:
+              - /url: https://github.com/henriqqw/CaosHub
+              - img [ref=e82]
+            - link "Twitter" [ref=e85] [cursor=pointer]:
+              - /url: https://twitter.com/caosdev
+              - img [ref=e86]
+            - link "Discord" [ref=e88] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e89]
+            - link "Instagram" [ref=e91] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e92]
+            - link "LinkedIn" [ref=e95] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e96]
+            - link "Email" [ref=e100] [cursor=pointer]:
+              - /url: mailto:contato@caosdev.com
+              - img [ref=e101]
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - text: Made with
+          - img [ref=e107]
+          - text: by
+          - link "caosdev" [ref=e109] [cursor=pointer]:
+            - /url: https://caosdev.vercel.app
+        - paragraph [ref=e110]: Most tools run locally in your browser. Media Downloader and Transcriber use backend services.
