@@ -106,13 +106,17 @@ export function QRCodeTool() {
     <>
       <Helmet>
         <title>Gerador de QR Code — Crie QR codes online grátis | CaosHub</title>
-        <meta name="description" content="Gere QR codes de links, textos e emails direto no navegador, sem upload. Baixe em PNG ou SVG com configurações personalizadas." />
+        <meta name="description" content="Gere QR codes de links, textos e emails direto no navegador, sem upload. Baixe em PNG ou SVG com configurações personalizadas. 100% gratuito." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/qr-code" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/qr-code" />
-        <meta property="og:title" content="Gerador de QR Code — CaosHub" />
-        <meta property="og:description" content="Crie QR codes de links, textos e emails direto no navegador, sem upload, grátis." />
-        <meta name="twitter:title" content="Gerador de QR Code — CaosHub" />
-        <meta name="twitter:description" content="Crie QR codes de links, textos e emails direto no navegador, sem upload, grátis." />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Gerador de QR Code — Crie QR codes online grátis | CaosHub" />
+        <meta property="og:description" content="Crie QR codes de links, textos e emails direto no navegador, sem upload, grátis. Baixe em PNG ou SVG." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/qr-code" />
+        <meta name="twitter:title" content="Gerador de QR Code — Crie QR codes online grátis | CaosHub" />
+        <meta name="twitter:description" content="Crie QR codes de links, textos e emails direto no navegador, sem upload, grátis. Baixe em PNG ou SVG." />
       </Helmet>
 
       <motion.div

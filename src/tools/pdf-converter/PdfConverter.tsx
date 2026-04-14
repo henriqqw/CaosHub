@@ -180,12 +180,18 @@ export function PdfConverter() {
   return (
     <>
       <Helmet>
-        <title>PDF Converter - PDF to PNG, JPG, WebP | CaosHub</title>
-        <meta
-          name="description"
-          content="Convert PDF pages to PNG, JPG or WebP ZIP files directly in your browser."
-        />
+        <title>PDF Converter — Convert PDF to PNG, JPG, WebP | CaosHub</title>
+        <meta name="description" content="Convert PDF pages to PNG, JPG or WebP directly in your browser. Choose quality preset and download all pages as a ZIP. No upload required." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/pdf-converter" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://caoshub.vercel.app/tools/pdf-converter" />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="PDF Converter — Convert PDF to PNG, JPG, WebP | CaosHub" />
+        <meta property="og:description" content="Convert PDF pages to PNG, JPG or WebP in your browser. No upload required. Download all pages as a ZIP." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/pdf-converter" />
+        <meta name="twitter:title" content="PDF Converter — Convert PDF to PNG, JPG, WebP | CaosHub" />
+        <meta name="twitter:description" content="Convert PDF pages to PNG, JPG or WebP in your browser. No upload required. Download all pages as a ZIP." />
       </Helmet>
 
       <motion.div

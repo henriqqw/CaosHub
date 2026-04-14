@@ -301,12 +301,18 @@ export function Transcriber() {
   return (
     <>
       <Helmet>
-        <title>Transcriber - Whisper TXT and SRT | CaosHub</title>
-        <meta
-          name="description"
-          content="Upload audio or video and generate automatic transcript (TXT) plus subtitles (SRT) with Whisper."
-        />
+        <title>Transcriber — Automatic Transcription with Whisper | CaosHub</title>
+        <meta name="description" content="Upload audio or video and get automatic transcription (TXT) and subtitles (SRT) using OpenAI Whisper. Supports multiple languages. Download as ZIP." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/transcriber" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://caoshub.vercel.app/tools/transcriber" />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Transcriber — Automatic Transcription with Whisper | CaosHub" />
+        <meta property="og:description" content="Upload audio or video and get automatic transcription (TXT) and subtitles (SRT) using OpenAI Whisper. Supports multiple languages. Download as ZIP." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/transcriber" />
+        <meta name="twitter:title" content="Transcriber — Automatic Transcription with Whisper | CaosHub" />
+        <meta name="twitter:description" content="Upload audio or video and get automatic transcription (TXT) and subtitles (SRT) using OpenAI Whisper. Supports multiple languages. Download as ZIP." />
       </Helmet>
 
       <motion.div

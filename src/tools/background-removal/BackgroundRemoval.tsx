@@ -97,22 +97,17 @@ export function BackgroundRemoval() {
     <>
       <Helmet>
         <title>Remover Fundo de Imagem — IA no navegador | CaosHub</title>
-        <meta
-          name="description"
-          content="Remova o fundo de qualquer imagem com IA, 100% no navegador. Sem upload para servidores, sem cadastro, gratuito."
-        />
+        <meta name="description" content="Remova o fundo de qualquer imagem com IA, 100% no navegador. Sem upload para servidores, sem cadastro, gratuito. Resultado em PNG transparente." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/background-removal" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/background-removal" />
-        <meta property="og:title" content="Remover Fundo de Imagem — CaosHub" />
-        <meta
-          property="og:description"
-          content="Remova o fundo de qualquer imagem com IA, 100% no navegador. Sem upload para servidores."
-        />
-        <meta name="twitter:title" content="Remover Fundo de Imagem — CaosHub" />
-        <meta
-          name="twitter:description"
-          content="Remova o fundo de qualquer imagem com IA, 100% no navegador. Sem upload para servidores."
-        />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Remover Fundo de Imagem — IA no navegador | CaosHub" />
+        <meta property="og:description" content="Remova o fundo de qualquer imagem com IA, 100% no navegador. Sem upload para servidores, sem cadastro. Resultado em PNG transparente." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/background-removal" />
+        <meta name="twitter:title" content="Remover Fundo de Imagem — IA no navegador | CaosHub" />
+        <meta name="twitter:description" content="Remova o fundo de qualquer imagem com IA, 100% no navegador. Sem upload para servidores, sem cadastro. Resultado em PNG transparente." />
       </Helmet>
 
       <motion.div

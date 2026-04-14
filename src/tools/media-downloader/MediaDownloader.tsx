@@ -280,23 +280,18 @@ export function MediaDownloader() {
   return (
     <>
       <Helmet>
-        <title>Media Downloader - MP4 e MP3 por URL | CaosHub</title>
-        <meta
-          name="description"
-          content="Cole uma URL e baixe em MP4 ou MP3 com presets low/full usando backend FastAPI."
-        />
+        <title>Media Downloader — Baixe vídeos e áudio por URL | CaosHub</title>
+        <meta name="description" content="Cole qualquer URL e baixe como MP4 ou MP3. Suporte a batch com ZIP. Presets de qualidade low e full. Processado via backend com yt-dlp e ffmpeg." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/media-downloader" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/media-downloader" />
-        <meta property="og:title" content="Media Downloader - MP4 e MP3 por URL | CaosHub" />
-        <meta
-          property="og:description"
-          content="Cole uma URL de midia, escolha MP4/MP3 e qualidade low/full para gerar download."
-        />
-        <meta name="twitter:title" content="Media Downloader - MP4 e MP3 por URL | CaosHub" />
-        <meta
-          name="twitter:description"
-          content="Baixe midia por URL com fluxo assíncrono e download final em MP4 ou MP3."
-        />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Media Downloader — Baixe vídeos e áudio por URL | CaosHub" />
+        <meta property="og:description" content="Cole qualquer URL e baixe como MP4 ou MP3. Suporte a batch com ZIP. Presets low e full. Processado via backend com yt-dlp e ffmpeg." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/media-downloader" />
+        <meta name="twitter:title" content="Media Downloader — Baixe vídeos e áudio por URL | CaosHub" />
+        <meta name="twitter:description" content="Cole qualquer URL e baixe como MP4 ou MP3. Suporte a batch com ZIP. Presets low e full. Processado via backend com yt-dlp e ffmpeg." />
       </Helmet>
 
       <motion.div

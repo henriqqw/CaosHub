@@ -5,30 +5,15 @@ import {
   Home,
   FileType2,
   FileText,
-  Film,
   ImageIcon,
   ImageDown,
-  Palette,
   QrCode,
-  AlignLeft,
   KeyRound,
-  FileImage,
-  Scissors,
   Wand2,
-  SlidersHorizontal,
-  Layers,
-  NotebookPen,
   Clapperboard,
-  Timer,
   AudioLines,
   Link2,
   Subtitles,
-  Lock,
-  Braces,
-  Hash,
-  KeySquare,
-  Shuffle,
-  Binary,
   ChevronDown,
   Menu,
   X,
@@ -41,9 +26,6 @@ const categories = [
     items: [
       { to: '/tools/pdf-converter', label: 'PDF Converter', icon: FileType2 },
       { to: '/tools/merge-pdf', label: 'MergePDF', icon: FileText },
-      { to: '/tools/pdf-to-images', label: 'PDF -> Images', icon: FileImage },
-      { to: '/tools/pdf-splitter', label: 'Split PDF', icon: Scissors },
-      { to: '/tools/pdf-protect', label: 'Protect PDF', icon: Lock },
     ],
   },
   {
@@ -51,28 +33,16 @@ const categories = [
     items: [
       { to: '/tools/image-converter', label: 'Image Converter', icon: ImageIcon },
       { to: '/tools/image-compressor', label: 'Compress', icon: ImageDown },
-      { to: '/tools/color-palette', label: 'Palette', icon: Palette },
       { to: '/tools/background-removal', label: 'Remove BG', icon: Wand2 },
-      { to: '/tools/image-editor', label: 'Edit', icon: SlidersHorizontal },
-      { to: '/tools/favicon-generator', label: 'Favicon', icon: Layers },
     ],
   },
   {
     label: 'Video / Audio',
     items: [
-      { to: '/tools/frame-extractor', label: 'Frame Extractor', icon: Film },
       { to: '/tools/video-converter', label: 'Video Converter', icon: Clapperboard },
-      { to: '/tools/video-trimmer', label: 'Video Trimmer', icon: Timer },
       { to: '/tools/audio-converter', label: 'Audio Converter', icon: AudioLines },
       { to: '/tools/media-downloader', label: 'Media Downloader', icon: Link2 },
       { to: '/tools/transcriber', label: 'Transcriber', icon: Subtitles },
-    ],
-  },
-  {
-    label: 'Text',
-    items: [
-      { to: '/tools/character-counter', label: 'Counter', icon: AlignLeft },
-      { to: '/tools/markdown-preview', label: 'Markdown', icon: NotebookPen },
     ],
   },
   {
@@ -82,35 +52,10 @@ const categories = [
       { to: '/tools/password-generator', label: 'Passwords', icon: KeyRound },
     ],
   },
-  {
-    label: 'Dev',
-    items: [
-      { to: '/tools/json-formatter', label: 'JSON', icon: Braces },
-      { to: '/tools/hash-generator', label: 'Hash', icon: Hash },
-      { to: '/tools/jwt-decoder', label: 'JWT', icon: KeySquare },
-      { to: '/tools/uuid-generator', label: 'UUID', icon: Shuffle },
-      { to: '/tools/encoder', label: 'Encoder', icon: Binary },
-    ],
-  },
 ]
-
-const CORE_TOOL_ROUTES = new Set([
-  '/tools/pdf-converter',
-  '/tools/image-converter',
-  '/tools/media-downloader',
-  '/tools/transcriber',
-  '/tools/video-converter',
-  '/tools/audio-converter',
-  '/tools/merge-pdf',
-  '/tools/image-compressor',
-  '/tools/background-removal',
-  '/tools/qr-code',
-  '/tools/password-generator',
-])
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
-  const [showAllTools, setShowAllTools] = useState(false)
 
   const toggle = (label: string) => {
     setCollapsed(prev => ({ ...prev, [label]: !prev[label] }))
@@ -154,30 +99,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
         <div className="h-px bg-border my-2 mx-1" />
 
-        <button
-          onClick={() => setShowAllTools(prev => !prev)}
-          className={cn(
-            'w-full text-left px-3 py-2 mb-2 rounded-lg text-xs font-semibold uppercase tracking-widest transition-colors',
-            showAllTools
-              ? 'border border-border text-text-secondary hover:text-text-primary hover:border-accent/40'
-              : 'border border-accent/30 bg-accent/10 text-accent hover:bg-accent/15',
-          )}
-        >
-          {showAllTools ? 'Focus mode (core tools)' : 'Show all tools'}
-        </button>
-
         {categories.map(cat => (
-          (() => {
-            const visibleItems = showAllTools
-              ? cat.items
-              : cat.items.filter(item => CORE_TOOL_ROUTES.has(item.to))
-
-            if (visibleItems.length === 0) {
-              return null
-            }
-
-            return (
-              <div key={cat.label}>
+          <div key={cat.label}>
             <button
               onClick={() => toggle(cat.label)}
               className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-semibold text-text-secondary uppercase tracking-widest hover:text-text-primary transition-colors duration-150"
@@ -197,7 +120,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                   transition={{ duration: 0.15 }}
                   className="overflow-hidden"
                 >
-                  {visibleItems.map(({ to, label, icon: Icon }) => (
+                  {cat.items.map(({ to, label, icon: Icon }) => (
                     <NavLink
                       key={to}
                       to={to}
@@ -218,9 +141,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                 </motion.div>
               )}
             </AnimatePresence>
-              </div>
-            )
-          })()
+          </div>
         ))}
       </nav>
 

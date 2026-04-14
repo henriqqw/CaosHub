@@ -79,22 +79,17 @@ export function ImageCompressor() {
     <>
       <Helmet>
         <title>Compressor de Imagens — Comprima JPEG, PNG e WebP no navegador | CaosHub</title>
-        <meta
-          name="description"
-          content="Comprima imagens JPEG, PNG e WebP diretamente no navegador, sem upload para servidores. Controle de qualidade, comparação antes/depois e download em lote."
-        />
+        <meta name="description" content="Comprima imagens JPEG, PNG e WebP diretamente no navegador, sem upload para servidores. Controle de qualidade, comparação antes/depois e download em lote." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/image-compressor" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/image-compressor" />
-        <meta property="og:title" content="Compressor de Imagens — CaosHub" />
-        <meta
-          property="og:description"
-          content="Comprima imagens JPEG, PNG e WebP diretamente no navegador, sem upload para servidores."
-        />
-        <meta name="twitter:title" content="Compressor de Imagens — CaosHub" />
-        <meta
-          name="twitter:description"
-          content="Comprima imagens JPEG, PNG e WebP diretamente no navegador, sem upload para servidores."
-        />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Compressor de Imagens — Comprima JPEG, PNG e WebP no navegador | CaosHub" />
+        <meta property="og:description" content="Comprima imagens JPEG, PNG e WebP diretamente no navegador, sem upload para servidores. Controle de qualidade e download em lote." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/image-compressor" />
+        <meta name="twitter:title" content="Compressor de Imagens — Comprima JPEG, PNG e WebP no navegador | CaosHub" />
+        <meta name="twitter:description" content="Comprima imagens JPEG, PNG e WebP diretamente no navegador, sem upload para servidores. Controle de qualidade e download em lote." />
       </Helmet>
 
       <motion.div

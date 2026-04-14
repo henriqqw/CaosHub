@@ -157,22 +157,17 @@ export function AudioConverter() {
     <>
       <Helmet>
         <title>Conversor de Áudio — MP3, WAV, OGG, FLAC no navegador | CaosHub</title>
-        <meta
-          name="description"
-          content="Converta áudio para MP3, WAV, OGG, AAC ou FLAC diretamente no navegador. Extraia áudio de vídeos. Nenhum arquivo sai do seu dispositivo."
-        />
+        <meta name="description" content="Converta áudio para MP3, WAV, OGG, AAC ou FLAC diretamente no navegador. Extraia áudio de vídeos. Nenhum arquivo sai do seu dispositivo. Gratuito." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/audio-converter" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/audio-converter" />
-        <meta property="og:title" content="Conversor de Áudio — CaosHub" />
-        <meta
-          property="og:description"
-          content="Converta áudio para MP3, WAV, OGG, AAC ou FLAC diretamente no navegador. Extraia áudio de vídeos."
-        />
-        <meta name="twitter:title" content="Conversor de Áudio — CaosHub" />
-        <meta
-          name="twitter:description"
-          content="Converta áudio para MP3, WAV, OGG, AAC ou FLAC diretamente no navegador. Extraia áudio de vídeos."
-        />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Conversor de Áudio — MP3, WAV, OGG, FLAC no navegador | CaosHub" />
+        <meta property="og:description" content="Converta áudio para MP3, WAV, OGG, AAC ou FLAC diretamente no navegador. Extraia áudio de vídeos. Nenhum arquivo sai do seu dispositivo." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/audio-converter" />
+        <meta name="twitter:title" content="Conversor de Áudio — MP3, WAV, OGG, FLAC no navegador | CaosHub" />
+        <meta name="twitter:description" content="Converta áudio para MP3, WAV, OGG, AAC ou FLAC diretamente no navegador. Extraia áudio de vídeos. Nenhum arquivo sai do seu dispositivo." />
       </Helmet>
 
       <motion.div

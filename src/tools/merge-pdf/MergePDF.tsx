@@ -39,9 +39,13 @@ export function MergePDF() {
         <title>MergePDF — Mescle PDFs gratuitamente no navegador | CaosHub</title>
         <meta name="description" content="Mescle múltiplos arquivos PDF em um só, diretamente no navegador. Sem upload para servidores, sem limite de arquivos, 100% gratuito e privado." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/merge-pdf" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/merge-pdf" />
+        <meta property="og:site_name" content="CaosHub" />
         <meta property="og:title" content="MergePDF — Mescle PDFs gratuitamente no navegador | CaosHub" />
         <meta property="og:description" content="Mescle múltiplos arquivos PDF em um só, diretamente no navegador. Sem upload para servidores, 100% gratuito e privado." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/merge-pdf" />
         <meta name="twitter:title" content="MergePDF — Mescle PDFs gratuitamente no navegador | CaosHub" />
         <meta name="twitter:description" content="Mescle múltiplos arquivos PDF em um só, diretamente no navegador. Sem upload para servidores, 100% gratuito e privado." />
       </Helmet>

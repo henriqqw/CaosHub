@@ -151,13 +151,17 @@ export function PasswordGenerator() {
     <>
       <Helmet>
         <title>Gerador de Senhas — Senhas seguras online | CaosHub</title>
-        <meta name="description" content="Gere senhas seguras e aleatórias no navegador. Controle o tamanho, tipo de caracteres e veja a força da senha em tempo real." />
+        <meta name="description" content="Gere senhas seguras e aleatórias no navegador. Controle o tamanho, tipo de caracteres e veja a força da senha em tempo real. Sem envio de dados." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/password-generator" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/password-generator" />
-        <meta property="og:title" content="Gerador de Senhas — CaosHub" />
-        <meta property="og:description" content="Gere senhas seguras e aleatórias no navegador, sem enviar dados para servidores." />
-        <meta name="twitter:title" content="Gerador de Senhas — CaosHub" />
-        <meta name="twitter:description" content="Gere senhas seguras e aleatórias no navegador, sem enviar dados para servidores." />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Gerador de Senhas — Senhas seguras online | CaosHub" />
+        <meta property="og:description" content="Gere senhas seguras e aleatórias no navegador, sem enviar dados para servidores. Controle tamanho e tipo de caracteres." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/password-generator" />
+        <meta name="twitter:title" content="Gerador de Senhas — Senhas seguras online | CaosHub" />
+        <meta name="twitter:description" content="Gere senhas seguras e aleatórias no navegador, sem enviar dados para servidores. Controle tamanho e tipo de caracteres." />
       </Helmet>
 
       <motion.div

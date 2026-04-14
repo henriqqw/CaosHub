@@ -66,9 +66,13 @@ export function ImageConverter() {
         <title>Image Converter — Converta imagens para JPEG, PNG e WebP | CaosHub</title>
         <meta name="description" content="Converta imagens entre JPEG, PNG e WebP diretamente no navegador. Sem upload para servidores, controle de qualidade, download em ZIP. 100% gratuito e privado." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/image-converter" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/image-converter" />
+        <meta property="og:site_name" content="CaosHub" />
         <meta property="og:title" content="Image Converter — Converta imagens para JPEG, PNG e WebP | CaosHub" />
         <meta property="og:description" content="Converta imagens entre JPEG, PNG e WebP diretamente no navegador. Sem upload, controle de qualidade, download em ZIP. 100% gratuito e privado." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/image-converter" />
         <meta name="twitter:title" content="Image Converter — Converta imagens para JPEG, PNG e WebP | CaosHub" />
         <meta name="twitter:description" content="Converta imagens entre JPEG, PNG e WebP diretamente no navegador. Sem upload, controle de qualidade, download em ZIP. 100% gratuito." />
       </Helmet>

@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   FileText,
   FileType2,
-  Film,
   ImageIcon,
   Github,
   Shield,
@@ -13,27 +12,13 @@ import {
   Code2,
   ArrowRight,
   ImageDown,
-  Palette,
   QrCode,
-  AlignLeft,
   KeyRound,
-  FileImage,
-  Scissors,
   Wand2,
-  SlidersHorizontal,
-  Layers,
   Clapperboard,
-  Timer,
   AudioLines,
   Link2,
   Subtitles,
-  Lock,
-  NotebookPen,
-  Braces,
-  Hash,
-  KeySquare,
-  Shuffle,
-  Binary,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 
@@ -58,30 +43,15 @@ type ToolCard = {
 const tools: ToolCard[] = [
   { icon: FileType2, name: 'PDF Converter', route: '/tools/pdf-converter', tag: 'PDF', headline: 'Convert PDF pages to PNG, JPG and WebP.' },
   { icon: FileText, name: 'MergePDF', route: '/tools/merge-pdf', tag: 'PDF', headline: 'Merge PDF files fast.' },
-  { icon: Film, name: 'Frame Extractor', route: '/tools/frame-extractor', tag: 'VIDEO', headline: 'Extract frames from any video.' },
   { icon: ImageIcon, name: 'Image Converter', route: '/tools/image-converter', tag: 'IMAGE', headline: 'Convert JPG, PNG and WebP.' },
   { icon: ImageDown, name: 'Image Compressor', route: '/tools/image-compressor', tag: 'IMAGE', headline: 'Reduce size with quality control.' },
-  { icon: Palette, name: 'Color Palette', route: '/tools/color-palette', tag: 'DESIGN', headline: 'Extract dominant colors from images.' },
-  { icon: QrCode, name: 'QR Code', route: '/tools/qr-code', tag: 'UTILITY', headline: 'Generate QR code in seconds.' },
-  { icon: AlignLeft, name: 'Character Counter', route: '/tools/character-counter', tag: 'TEXT', headline: 'Text stats in real time.' },
-  { icon: KeyRound, name: 'Password Generator', route: '/tools/password-generator', tag: 'SECURITY', headline: 'Generate strong passwords.' },
-  { icon: FileImage, name: 'PDF to Images', route: '/tools/pdf-to-images', tag: 'PDF', headline: 'Render PDF pages as images.' },
-  { icon: Scissors, name: 'Split PDF', route: '/tools/pdf-splitter', tag: 'PDF', headline: 'Split by page, range or chunk.' },
   { icon: Wand2, name: 'Background Removal', route: '/tools/background-removal', tag: 'IMAGE', headline: 'Remove background with AI.' },
-  { icon: SlidersHorizontal, name: 'Image Editor', route: '/tools/image-editor', tag: 'IMAGE', headline: 'Resize, crop, rotate and flip.' },
-  { icon: Layers, name: 'Favicon Generator', route: '/tools/favicon-generator', tag: 'IMAGE', headline: 'Generate multiple favicon sizes.' },
   { icon: Clapperboard, name: 'Video Converter', route: '/tools/video-converter', tag: 'VIDEO', headline: 'Convert video formats locally.' },
-  { icon: Timer, name: 'Video Trimmer', route: '/tools/video-trimmer', tag: 'VIDEO', headline: 'Trim videos quickly.' },
   { icon: AudioLines, name: 'Audio Converter', route: '/tools/audio-converter', tag: 'AUDIO', headline: 'Convert and extract audio.' },
   { icon: Link2, name: 'Media Downloader', route: '/tools/media-downloader', tag: 'MEDIA', headline: 'Download URL media as MP4 or MP3.' },
   { icon: Subtitles, name: 'Transcriber', route: '/tools/transcriber', tag: 'AI', headline: 'Whisper transcript and SRT subtitles.' },
-  { icon: Lock, name: 'Protect PDF', route: '/tools/pdf-protect', tag: 'PDF', headline: 'Add password and permissions.' },
-  { icon: NotebookPen, name: 'Markdown Preview', route: '/tools/markdown-preview', tag: 'TEXT', headline: 'Editor with live preview.' },
-  { icon: Braces, name: 'JSON Formatter', route: '/tools/json-formatter', tag: 'DEV', headline: 'Format, minify and validate JSON.' },
-  { icon: Hash, name: 'Hash Generator', route: '/tools/hash-generator', tag: 'DEV', headline: 'Generate MD5 and SHA hashes.' },
-  { icon: KeySquare, name: 'JWT Decoder', route: '/tools/jwt-decoder', tag: 'DEV', headline: 'Decode token payload fast.' },
-  { icon: Shuffle, name: 'UUID Generator', route: '/tools/uuid-generator', tag: 'DEV', headline: 'Generate UUID v4 in batch.' },
-  { icon: Binary, name: 'Encoder', route: '/tools/encoder', tag: 'DEV', headline: 'Encode/decode Base64, URL, HTML.' },
+  { icon: QrCode, name: 'QR Code', route: '/tools/qr-code', tag: 'UTILITY', headline: 'Generate QR code in seconds.' },
+  { icon: KeyRound, name: 'Password Generator', route: '/tools/password-generator', tag: 'SECURITY', headline: 'Generate strong passwords.' },
 ]
 
 const pillars = [
@@ -174,7 +144,7 @@ function ToolsSection({ navigate }: { navigate: (to: string) => void }) {
           </motion.h2>
         </motion.div>
 
-        <motion.div variants={stagger(0.06)} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1 }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <motion.div variants={stagger(0.06)} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1 }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {tools.map(tool => (
             <motion.div
               key={tool.route}
@@ -223,15 +193,18 @@ export function Home() {
   return (
     <>
       <Helmet>
-        <title>CaosHub - Free online tools</title>
-        <meta name="description" content="Free tools for PDF, image, video and dev workflows. Media Downloader uses backend processing for URL downloads." />
+        <title>CaosHub — Free Online Tools for PDF, Image, Video and Audio</title>
+        <meta name="description" content="Free tools for PDF, image, video and audio. Convert, compress, merge and transcribe directly in your browser. Media Downloader and Transcriber use backend processing." />
         <link rel="canonical" href="https://caoshub.vercel.app/" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/" />
-        <meta property="og:title" content="CaosHub - Free online tools" />
-        <meta property="og:description" content="Fast web tools in one place. Includes Media Downloader for URL to MP4/MP3 workflows." />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="CaosHub — Free Online Tools for PDF, Image, Video and Audio" />
+        <meta property="og:description" content="Free tools for PDF, image, video and audio. Convert, compress, merge and transcribe directly in your browser. Media Downloader and Transcriber use backend processing." />
+        <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content="https://caoshub.vercel.app/" />
-        <meta name="twitter:title" content="CaosHub - Free online tools" />
-        <meta name="twitter:description" content="Fast web tools in one place. Includes Media Downloader for URL to MP4/MP3 workflows." />
+        <meta name="twitter:title" content="CaosHub — Free Online Tools for PDF, Image, Video and Audio" />
+        <meta name="twitter:description" content="Free tools for PDF, image, video and audio. Convert, compress, merge and transcribe directly in your browser. Media Downloader and Transcriber use backend processing." />
       </Helmet>
 
       <div>

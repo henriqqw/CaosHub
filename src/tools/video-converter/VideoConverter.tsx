@@ -156,22 +156,17 @@ export function VideoConverter() {
     <>
       <Helmet>
         <title>Conversor de Vídeo — MP4, WebM, MKV no navegador | CaosHub</title>
-        <meta
-          name="description"
-          content="Converta vídeos MP4, MKV, AVI, MOV e WebM diretamente no navegador, sem upload para servidores. Suporte a múltiplos formatos e presets de qualidade."
-        />
+        <meta name="description" content="Converta vídeos MP4, MKV, AVI, MOV e WebM diretamente no navegador, sem upload para servidores. Suporte a múltiplos formatos e presets de qualidade via FFmpeg.wasm." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/video-converter" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/video-converter" />
-        <meta property="og:title" content="Conversor de Vídeo — CaosHub" />
-        <meta
-          property="og:description"
-          content="Converta vídeos MP4, MKV, AVI, MOV e WebM diretamente no navegador, sem upload para servidores."
-        />
-        <meta name="twitter:title" content="Conversor de Vídeo — CaosHub" />
-        <meta
-          name="twitter:description"
-          content="Converta vídeos MP4, MKV, AVI, MOV e WebM diretamente no navegador, sem upload para servidores."
-        />
+        <meta property="og:site_name" content="CaosHub" />
+        <meta property="og:title" content="Conversor de Vídeo — MP4, WebM, MKV no navegador | CaosHub" />
+        <meta property="og:description" content="Converta vídeos MP4, MKV, AVI, MOV e WebM diretamente no navegador. Sem upload para servidores. Processado localmente via FFmpeg.wasm." />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://caoshub.vercel.app/tools/video-converter" />
+        <meta name="twitter:title" content="Conversor de Vídeo — MP4, WebM, MKV no navegador | CaosHub" />
+        <meta name="twitter:description" content="Converta vídeos MP4, MKV, AVI, MOV e WebM diretamente no navegador. Sem upload para servidores. Processado localmente via FFmpeg.wasm." />
       </Helmet>
 
       <motion.div
