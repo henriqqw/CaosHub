@@ -1,13 +1,16 @@
 ﻿from __future__ import annotations
 
 import asyncio
+import logging
 import mimetypes
 import os
 import re
 import secrets
 import shutil
 import subprocess
+import time
 import zipfile
+from collections import defaultdict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -16,10 +19,38 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field, field_validator, model_validator
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+logger = logging.getLogger("caoshub")
+
+# ---------------------------------------------------------------------------
+# Rate limiting — sliding window per IP
+# ---------------------------------------------------------------------------
+_rate_store: dict[str, list[float]] = defaultdict(list)
+_rate_lock = asyncio.Lock()
+RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "20"))
+RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
+
+
+async def rate_limit(request: Request) -> None:
+    ip = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    async with _rate_lock:
+        window = [t for t in _rate_store[ip] if now - t < RATE_LIMIT_WINDOW]
+        if len(window) >= RATE_LIMIT_REQUESTS:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Too many requests — max {RATE_LIMIT_REQUESTS} per {RATE_LIMIT_WINDOW}s.",
+            )
+        window.append(now)
+        _rate_store[ip] = window
 
 
 class OutputFormat(str, Enum):
@@ -818,16 +849,45 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Accept"],
+    expose_headers=["Content-Disposition"],
+    max_age=600,
 )
 
 
-@app.get("/api/health")
-async def health() -> dict[str, Any]:
-    whisper_error = get_whisper_import_error()
-    whisper_available = whisper_error is None
+@app.middleware("http")
+async def audit_log(request: Request, call_next: Any) -> Response:
+    start = time.monotonic()
+    response: Response = await call_next(request)
+    duration = time.monotonic() - start
+    ip = request.client.host if request.client else "unknown"
+    logger.info(
+        "method=%s path=%s status=%d ip=%s duration=%.3fs",
+        request.method,
+        request.url.path,
+        response.status_code,
+        ip,
+        duration,
+    )
+    return response
 
+
+@app.get("/api/health")
+async def health() -> dict[str, str]:
+    # Minimal response for Render health checks — no internal details exposed.
+    return {"status": "ok"}
+
+
+ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY", "")
+
+
+@app.get("/api/internal/health")
+async def health_internal(request: Request) -> dict[str, Any]:
+    provided_key = request.headers.get("x-admin-key", "")
+    if not ADMIN_SECRET_KEY or provided_key != ADMIN_SECRET_KEY:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    whisper_error = get_whisper_import_error()
     return {
         "status": "ok",
         "yt_dlp": shutil.which("yt-dlp") is not None,
@@ -836,14 +896,14 @@ async def health() -> dict[str, Any]:
         "workers": MAX_CONCURRENT_JOBS,
         "transcription_queue_size": transcription_job_queue.qsize(),
         "transcription_workers": MAX_TRANSCRIPTION_CONCURRENT_JOBS,
-        "whisper_available": whisper_available,
+        "whisper_available": whisper_error is None,
         "whisper_error": whisper_error,
         "whisper_model_loaded": whisper_model is not None,
         "whisper_model_size": WHISPER_MODEL_SIZE,
     }
 
 
-@app.post("/api/jobs", status_code=202)
+@app.post("/api/jobs", status_code=202, dependencies=[Depends(rate_limit)])
 async def create_job(payload: CreateJobRequest, request: Request) -> dict[str, Any]:
     job_id = secrets.token_hex(8)
     work_dir = STORAGE_ROOT / job_id
@@ -903,7 +963,7 @@ async def download_job_file(job_id: str) -> FileResponse:
     )
 
 
-@app.post("/api/transcriptions/jobs", status_code=202)
+@app.post("/api/transcriptions/jobs", status_code=202, dependencies=[Depends(rate_limit)])
 async def create_transcription_job(
     request: Request,
     file: UploadFile = File(...),

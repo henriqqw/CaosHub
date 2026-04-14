@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button'
 import { ProgressBar } from '../../components/ui/ProgressBar'
 import { ToastContainer } from '../../components/ui/Toast'
 import { useToast } from '../../hooks/useToast'
-import { cn } from '../../lib/utils'
+import { cn, isSafeDownloadUrl } from '../../lib/utils'
 
 type MediaFormat = 'mp4' | 'mp3'
 type QualityPreset = 'low' | 'full'
@@ -472,7 +472,9 @@ export function MediaDownloader() {
 
               <Button
                 onClick={() => {
-                  if (job.download_url) window.location.assign(job.download_url)
+                  if (job.download_url && isSafeDownloadUrl(job.download_url, new URL(apiBase).origin)) {
+                    window.location.assign(job.download_url)
+                  }
                 }}
                 disabled={!canDownload}
                 className="w-full"

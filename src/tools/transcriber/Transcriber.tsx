@@ -7,7 +7,7 @@ import { FileUploadZone } from '../../components/ui/FileUploadZone'
 import { ProgressBar } from '../../components/ui/ProgressBar'
 import { ToastContainer } from '../../components/ui/Toast'
 import { useToast } from '../../hooks/useToast'
-import { cn, formatBytes } from '../../lib/utils'
+import { cn, formatBytes, isSafeDownloadUrl } from '../../lib/utils'
 
 type JobStatus = 'queued' | 'processing' | 'completed' | 'failed'
 
@@ -200,12 +200,17 @@ export function Transcriber() {
 
   useEffect(() => {
     if (job?.status === 'completed' && job.download_url) {
-      const a = document.createElement('a')
-      a.href = job.download_url
-      a.download = job.filename ?? 'transcription.zip'
-      a.click()
+      const apiOrigin = new URL(apiBase).origin
+      if (isSafeDownloadUrl(job.download_url, apiOrigin)) {
+        const a = document.createElement('a')
+        a.href = job.download_url
+        a.download = job.filename ?? 'transcription.zip'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }
     }
-  }, [job?.status])
+  }, [job?.status, job?.download_url, apiBase])
 
   useEffect(() => {
     if (!isLanguageModalOpen) return
@@ -472,7 +477,9 @@ export function Transcriber() {
                 className="w-full"
                 disabled={!canDownload}
                 onClick={() => {
-                  if (job.download_url) window.location.assign(job.download_url)
+                  if (job.download_url && isSafeDownloadUrl(job.download_url, new URL(apiBase).origin)) {
+                    window.location.assign(job.download_url)
+                  }
                 }}
               >
                 <Download className="w-4 h-4" />

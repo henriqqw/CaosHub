@@ -25,6 +25,24 @@ export function generateId(): string {
   return crypto.randomUUID()
 }
 
+/**
+ * Validates that a URL returned by the backend is safe to use as a download target.
+ * Prevents open redirect and javascript: URI injection attacks by enforcing:
+ *  - Protocol must be http or https
+ *  - Origin must match the expected API origin
+ */
+export function isSafeDownloadUrl(url: string, expectedOrigin: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return (
+      (parsed.protocol === 'http:' || parsed.protocol === 'https:') &&
+      parsed.origin === expectedOrigin
+    )
+  } catch {
+    return false
+  }
+}
+
 export function dataUrlToBlob(dataUrl: string): Blob {
   const [header, data] = dataUrl.split(',')
   const mime = header.match(/:(.*?);/)?.[1] ?? 'application/octet-stream'
