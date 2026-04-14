@@ -1,8 +1,8 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import asyncio
+import json
 import logging
-import mimetypes
 import os
 import re
 import secrets
@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 logging.basicConfig(
     level=logging.INFO,
@@ -80,59 +80,15 @@ def validate_http_url(value: str) -> str:
     return normalized
 
 
-class CreateJobRequest(BaseModel):
-    url: str | None = Field(default=None, min_length=8, max_length=2048)
-    urls: list[str] | None = None
+class ResolveRequest(BaseModel):
+    url: str = Field(min_length=8, max_length=2048)
     format: OutputFormat = OutputFormat.MP4
     quality: QualityPreset = QualityPreset.FULL
 
     @field_validator("url")
     @classmethod
-    def validate_url(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
+    def validate_url(cls, value: str) -> str:
         return validate_http_url(value)
-
-    @field_validator("urls")
-    @classmethod
-    def validate_urls(cls, values: list[str] | None) -> list[str] | None:
-        if values is None:
-            return None
-        if len(values) == 0:
-            raise ValueError("urls cannot be empty")
-        if len(values) > 25:
-            raise ValueError("Maximum 25 URLs per batch job")
-        return [validate_http_url(value) for value in values]
-
-    @model_validator(mode="after")
-    def ensure_url_source(self) -> "CreateJobRequest":
-        if not self.url and not self.urls:
-            raise ValueError("Provide url or urls")
-        return self
-
-    def effective_urls(self) -> list[str]:
-        if self.urls:
-            return self.urls
-        return [self.url] if self.url else []
-
-
-@dataclass
-class JobRecord:
-    id: str
-    url: str
-    urls: list[str]
-    output_format: OutputFormat
-    quality: QualityPreset
-    work_dir: Path
-    created_at: datetime
-    updated_at: datetime
-    total_urls: int
-    status: JobStatus = JobStatus.QUEUED
-    progress: int = 0
-    completed_urls: int = 0
-    error: str | None = None
-    filename: str | None = None
-    file_path: Path | None = None
 
 
 @dataclass
@@ -162,14 +118,13 @@ def parse_origins(raw: str) -> list[str]:
 
 
 API_TITLE = "CaosHub Media Backend"
-API_VERSION = "0.1.0"
+API_VERSION = "0.2.0"
 ALLOWED_ORIGINS = parse_origins(os.getenv("ALLOWED_ORIGINS", "http://localhost:5173"))
 STORAGE_ROOT = Path(os.getenv("STORAGE_ROOT", "./backend/storage")).resolve()
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "")
 JOB_TTL_MINUTES = max(5, int(os.getenv("JOB_TTL_MINUTES", "45")))
-MAX_CONCURRENT_JOBS = max(1, int(os.getenv("MAX_CONCURRENT_JOBS", "1")))
-DOWNLOAD_TIMEOUT_SECONDS = max(60, int(os.getenv("DOWNLOAD_TIMEOUT_SECONDS", "1200")))
 CLEANUP_INTERVAL_SECONDS = max(30, int(os.getenv("CLEANUP_INTERVAL_SECONDS", "60")))
+RESOLVE_TIMEOUT_SECONDS = max(30, int(os.getenv("RESOLVE_TIMEOUT_SECONDS", "60")))
 MAX_TRANSCRIPTION_FILE_MB = max(10, int(os.getenv("MAX_TRANSCRIPTION_FILE_MB", "500")))
 MAX_TRANSCRIPTION_FILE_BYTES = MAX_TRANSCRIPTION_FILE_MB * 1024 * 1024
 TRANSCRIPTION_TIMEOUT_SECONDS = max(120, int(os.getenv("TRANSCRIPTION_TIMEOUT_SECONDS", "7200")))
@@ -177,11 +132,6 @@ MAX_TRANSCRIPTION_CONCURRENT_JOBS = max(1, int(os.getenv("MAX_TRANSCRIPTION_CONC
 WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "small")
 WHISPER_DEVICE = os.getenv("WHISPER_DEVICE", "cpu")
 WHISPER_COMPUTE_TYPE = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
-
-jobs: dict[str, JobRecord] = {}
-jobs_lock = asyncio.Lock()
-job_queue: asyncio.Queue[str] = asyncio.Queue()
-worker_tasks: list[asyncio.Task[None]] = []
 
 transcription_jobs: dict[str, TranscriptionJobRecord] = {}
 transcription_jobs_lock = asyncio.Lock()
@@ -218,223 +168,139 @@ def run_command(command: list[str], cwd: Path, timeout: int) -> None:
         raise RuntimeError(summary)
 
 
-def build_ytdlp_command(
-    url: str,
-    output_format: OutputFormat,
-    quality: QualityPreset,
-    work_dir: Path,
-    output_template: str = "download.%(ext)s",
-) -> list[str]:
-    base = [
+# ---------------------------------------------------------------------------
+# Resolve: extract direct CDN URL from yt-dlp without downloading
+# ---------------------------------------------------------------------------
+
+def _ytdlp_base_args() -> list[str]:
+    args = [
         "yt-dlp",
         "--no-playlist",
-        "--no-overwrites",
         "--no-warnings",
-        "--restrict-filenames",
-        "--extractor-args",
-        "youtube:player_client=web,mweb,ios",
-        "--paths",
-        str(work_dir),
-        "--output",
-        output_template,
+        "--extractor-args", "youtube:player_client=web,mweb,ios",
     ]
-
     if YTDLP_COOKIES_FILE:
-        base += ["--cookies", YTDLP_COOKIES_FILE]
-
-    if output_format is OutputFormat.MP3:
-        audio_quality = "0" if quality is QualityPreset.FULL else "7"
-        return [
-            *base,
-            "-f",
-            "bestaudio/best",
-            "--extract-audio",
-            "--audio-format",
-            "mp3",
-            "--audio-quality",
-            audio_quality,
-            url,
-        ]
-
-    format_selector = (
-        "bv*+ba/b"
-        if quality is QualityPreset.FULL
-        else "bestvideo[height<=480]+bestaudio/best[height<=480]/best"
-    )
-    return [
-        *base,
-        "-f",
-        format_selector,
-        "--merge-output-format",
-        "mp4",
-        "--remux-video",
-        "mp4",
-        url,
-    ]
+        args += ["--cookies", YTDLP_COOKIES_FILE]
+    return args
 
 
-def collect_media_files(work_dir: Path) -> list[Path]:
-    skipped_ext = {
-        ".part",
-        ".ytdl",
-        ".tmp",
-        ".temp",
-        ".json",
-        ".description",
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".webp",
-        ".vtt",
-        ".srt",
-        ".ass",
-        ".lrc",
-    }
-
-    files = [p for p in work_dir.iterdir() if p.is_file()]
-    media: list[Path] = []
-    for file in files:
-        if file.name.endswith(".info.json"):
-            continue
-        if file.suffix.lower() in skipped_ext:
-            continue
-        media.append(file)
-    media.sort(key=lambda path: path.stat().st_mtime, reverse=True)
-    return media
-
-
-def ensure_mp4_file(source_path: Path, work_dir: Path, quality: QualityPreset) -> Path:
-    if source_path.suffix.lower() == ".mp4" and quality is QualityPreset.FULL:
-        return source_path
-
-    target = work_dir / ("download-low.mp4" if quality is QualityPreset.LOW else "download.mp4")
-
-    if quality is QualityPreset.LOW:
-        command = [
-            "ffmpeg",
-            "-y",
-            "-i",
-            str(source_path),
-            "-vf",
-            "scale=-2:480:force_original_aspect_ratio=decrease",
-            "-c:v",
-            "libx264",
-            "-preset",
-            "veryfast",
-            "-crf",
-            "30",
-            "-c:a",
-            "aac",
-            "-b:a",
-            "128k",
-            str(target),
-        ]
-    else:
-        command = [
-            "ffmpeg",
-            "-y",
-            "-i",
-            str(source_path),
-            "-c:v",
-            "libx264",
-            "-preset",
-            "veryfast",
-            "-crf",
-            "22",
-            "-c:a",
-            "aac",
-            "-b:a",
-            "192k",
-            str(target),
-        ]
-
-    run_command(command, cwd=work_dir, timeout=DOWNLOAD_TIMEOUT_SECONDS)
-    return target
-
-
-def run_download_pipeline(
-    url: str,
+def _pick_best_format(
+    formats: list[dict[str, Any]],
     output_format: OutputFormat,
     quality: QualityPreset,
-    work_dir: Path,
-    output_template: str = "download.%(ext)s",
-) -> tuple[Path, str]:
-    parsed = urlparse(url)
-    host = parsed.netloc.lower()
-    path = parsed.path.lower()
+) -> dict[str, Any] | None:
+    """
+    Select the best pre-muxed format (single URL) so the browser downloads
+    directly from the CDN without server-side storage or merging.
+    """
+    if output_format is OutputFormat.MP3:
+        # Return best audio-only stream; browser will download as m4a/webm
+        audio = [
+            f for f in formats
+            if f.get("url")
+            and f.get("acodec", "none") not in ("none", None)
+            and f.get("vcodec", "none") in ("none", None)
+        ]
+        if not audio:
+            audio = [f for f in formats if f.get("url") and f.get("acodec", "none") not in ("none", None)]
+        if not audio:
+            return None
+        return sorted(audio, key=lambda f: f.get("abr") or f.get("tbr") or 0, reverse=True)[0]
 
-    if "spotify.com" in host and any(token in path for token in ("/track/", "/album/", "/playlist/")):
+    # MP4: prefer pre-muxed streams (both video and audio in one file)
+    muxed = [
+        f for f in formats
+        if f.get("url")
+        and f.get("vcodec", "none") not in ("none", None)
+        and f.get("acodec", "none") not in ("none", None)
+        and f.get("ext") == "mp4"
+    ]
+    if not muxed:
+        muxed = [
+            f for f in formats
+            if f.get("url")
+            and f.get("vcodec", "none") not in ("none", None)
+            and f.get("acodec", "none") not in ("none", None)
+        ]
+
+    if not muxed:
+        return None
+
+    if quality is QualityPreset.LOW:
+        # Pick lowest resolution that's still ≥240p
+        candidates = [f for f in muxed if (f.get("height") or 0) <= 480]
+        pool = candidates if candidates else muxed
+        return sorted(pool, key=lambda f: f.get("height") or 0)[0]
+
+    # FULL: pick highest resolution pre-muxed
+    return sorted(muxed, key=lambda f: f.get("height") or 0, reverse=True)[0]
+
+
+def run_resolve(url: str, output_format: OutputFormat, quality: QualityPreset) -> dict[str, Any]:
+    if shutil.which("yt-dlp") is None:
+        raise RuntimeError("yt-dlp is not installed in the server environment")
+
+    parsed_host = urlparse(url).netloc.lower()
+    if "spotify.com" in parsed_host:
         raise RuntimeError(
-            "Spotify track/album/playlist links are protected and cannot be downloaded directly. "
+            "Spotify links are protected and cannot be downloaded. "
             "Podcast episodes may work depending on availability."
         )
 
-    if shutil.which("yt-dlp") is None:
-        raise RuntimeError("yt-dlp is not installed in the server environment")
-    if shutil.which("ffmpeg") is None:
-        raise RuntimeError("ffmpeg is not installed in the server environment")
+    command = _ytdlp_base_args() + ["--dump-json", url]
 
-    command = build_ytdlp_command(
-        url=url,
-        output_format=output_format,
-        quality=quality,
-        work_dir=work_dir,
-        output_template=output_template,
+    completed = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        timeout=RESOLVE_TIMEOUT_SECONDS,
+        check=False,
     )
-    run_command(command, cwd=work_dir, timeout=DOWNLOAD_TIMEOUT_SECONDS)
 
-    media_files = collect_media_files(work_dir)
-    if not media_files:
-        raise RuntimeError("No downloadable media file was produced from this URL")
+    if completed.returncode != 0:
+        details = completed.stderr or completed.stdout or ""
+        summary = tail_lines(details) or f"yt-dlp exited with code {completed.returncode}"
+        raise RuntimeError(summary)
 
-    output_path = media_files[0]
-    if output_format is OutputFormat.MP4:
-        output_path = ensure_mp4_file(output_path, work_dir, quality)
-    elif output_path.suffix.lower() != ".mp3":
-        fallback = work_dir / "download.mp3"
-        run_command(
-            [
-                "ffmpeg",
-                "-y",
-                "-i",
-                str(output_path),
-                "-vn",
-                "-c:a",
-                "libmp3lame",
-                "-b:a",
-                "128k" if quality is QualityPreset.LOW else "320k",
-                str(fallback),
-            ],
-            cwd=work_dir,
-            timeout=DOWNLOAD_TIMEOUT_SECONDS,
-        )
-        output_path = fallback
+    try:
+        info = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("yt-dlp returned invalid JSON") from exc
 
-    filename = sanitize_filename(output_path.name)
-    return output_path, filename
+    formats: list[dict[str, Any]] = info.get("formats", [])
+    title: str = info.get("title") or info.get("id") or "download"
+    ext_fallback: str = info.get("ext") or ("mp3" if output_format is OutputFormat.MP3 else "mp4")
 
+    chosen = _pick_best_format(formats, output_format, quality)
 
-def ensure_unique_path(path: Path) -> Path:
-    if not path.exists():
-        return path
+    if chosen is None:
+        # Fall back to the top-level URL if no suitable format found
+        direct_url = info.get("url")
+        if not direct_url:
+            raise RuntimeError("No downloadable stream found for this URL")
+        chosen = {"url": direct_url, "ext": ext_fallback, "filesize": info.get("filesize")}
 
-    stem = path.stem
-    suffix = path.suffix
-    for index in range(1, 10_000):
-        candidate = path.with_name(f"{stem}_{index}{suffix}")
-        if not candidate.exists():
-            return candidate
-    raise RuntimeError("Unable to generate unique filename for batch output")
+    stream_url: str = chosen["url"]
+    stream_ext: str = chosen.get("ext") or ext_fallback
+    filesize: int | None = chosen.get("filesize") or chosen.get("filesize_approx")
+    height: int | None = chosen.get("height")
+
+    safe_title = sanitize_filename(title)
+    filename = f"{safe_title}.{stream_ext}"
+
+    return {
+        "url": stream_url,
+        "filename": filename,
+        "ext": stream_ext,
+        "title": title,
+        "filesize": filesize,
+        "height": height,
+    }
 
 
-def create_zip_archive(source_dir: Path, target_zip: Path) -> Path:
-    with zipfile.ZipFile(target_zip, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for file in sorted(source_dir.iterdir()):
-            if not file.is_file():
-                continue
-            archive.write(file, arcname=file.name)
-    return target_zip
-
+# ---------------------------------------------------------------------------
+# Transcription helpers (unchanged)
+# ---------------------------------------------------------------------------
 
 def normalize_language(value: str | None) -> str | None:
     if value is None:
@@ -494,6 +360,15 @@ def write_transcription_outputs(
     return txt_path, srt_path
 
 
+def create_zip_archive(source_dir: Path, target_zip: Path) -> Path:
+    with zipfile.ZipFile(target_zip, "w", compression=zipfile.ZIP_DEFLATE) as archive:
+        for file in sorted(source_dir.iterdir()):
+            if not file.is_file():
+                continue
+            archive.write(file, arcname=file.name)
+    return target_zip
+
+
 def run_transcription_pipeline(
     source_path: Path,
     work_dir: Path,
@@ -507,15 +382,8 @@ def run_transcription_pipeline(
     prepared_audio = work_dir / "prepared-audio.wav"
     run_command(
         [
-            "ffmpeg",
-            "-y",
-            "-i",
-            str(source_path),
-            "-vn",
-            "-ac",
-            "1",
-            "-ar",
-            "16000",
+            "ffmpeg", "-y", "-i", str(source_path),
+            "-vn", "-ac", "1", "-ar", "16000",
             str(prepared_audio),
         ],
         cwd=work_dir,
@@ -582,31 +450,6 @@ async def get_whisper_model() -> Any:
         return whisper_model
 
 
-def job_to_payload(job: JobRecord, request: Request | None = None) -> dict[str, Any]:
-    download_url: str | None = None
-    if request is not None and job.status is JobStatus.COMPLETED:
-        base_url = str(request.base_url).rstrip("/")
-        download_url = f"{base_url}/api/jobs/{job.id}/download"
-
-    return {
-        "id": job.id,
-        "url": job.url,
-        "urls": job.urls,
-        "mode": "batch" if job.total_urls > 1 else "single",
-        "status": job.status.value,
-        "progress": job.progress,
-        "total_urls": job.total_urls,
-        "completed_urls": job.completed_urls,
-        "format": job.output_format.value,
-        "quality": job.quality.value,
-        "filename": job.filename,
-        "error": job.error,
-        "created_at": job.created_at.isoformat(),
-        "updated_at": job.updated_at.isoformat(),
-        "download_url": download_url,
-    }
-
-
 def transcription_job_to_payload(
     job: TranscriptionJobRecord,
     request: Request | None = None,
@@ -632,17 +475,6 @@ def transcription_job_to_payload(
     }
 
 
-async def update_job(job_id: str, **changes: Any) -> JobRecord | None:
-    async with jobs_lock:
-        job = jobs.get(job_id)
-        if not job:
-            return None
-        for key, value in changes.items():
-            setattr(job, key, value)
-        job.updated_at = utcnow()
-        return job
-
-
 async def update_transcription_job(
     job_id: str, **changes: Any
 ) -> TranscriptionJobRecord | None:
@@ -654,80 +486,6 @@ async def update_transcription_job(
             setattr(job, key, value)
         job.updated_at = utcnow()
         return job
-
-
-async def process_job(job_id: str) -> None:
-    job = await update_job(job_id, status=JobStatus.PROCESSING, progress=10, error=None)
-    if job is None:
-        return
-
-    try:
-        if job.total_urls <= 1:
-            result_path, filename = await asyncio.to_thread(
-                run_download_pipeline,
-                job.url,
-                job.output_format,
-                job.quality,
-                job.work_dir,
-            )
-            await update_job(
-                job_id,
-                status=JobStatus.COMPLETED,
-                progress=100,
-                file_path=result_path,
-                filename=filename,
-                completed_urls=1,
-                error=None,
-            )
-            return
-
-        batch_dir = job.work_dir / "batch"
-        batch_dir.mkdir(parents=True, exist_ok=True)
-
-        for index, source_url in enumerate(job.urls, start=1):
-            item_dir = job.work_dir / f"item-{index:02d}"
-            item_dir.mkdir(parents=True, exist_ok=True)
-
-            item_path, item_name = await asyncio.to_thread(
-                run_download_pipeline,
-                source_url,
-                job.output_format,
-                job.quality,
-                item_dir,
-            )
-
-            destination_name = sanitize_filename(f"{index:02d}_{item_name}")
-            destination_path = ensure_unique_path(batch_dir / destination_name)
-            shutil.move(str(item_path), str(destination_path))
-
-            progress = min(95, 10 + int((index / job.total_urls) * 80))
-            await update_job(job_id, progress=progress, completed_urls=index)
-
-        zip_path = await asyncio.to_thread(
-            create_zip_archive,
-            batch_dir,
-            job.work_dir / f"media-batch-{job.id}.zip",
-        )
-        zip_name = sanitize_filename(zip_path.name)
-
-        await update_job(
-            job_id,
-            status=JobStatus.COMPLETED,
-            progress=100,
-            file_path=zip_path,
-            filename=zip_name,
-            completed_urls=job.total_urls,
-            error=None,
-        )
-    except Exception as exc:
-        await update_job(
-            job_id,
-            status=JobStatus.FAILED,
-            progress=100,
-            error=str(exc),
-            file_path=None,
-            filename=None,
-        )
 
 
 async def process_transcription_job(job_id: str) -> None:
@@ -772,15 +530,6 @@ async def process_transcription_job(job_id: str) -> None:
         )
 
 
-async def worker_loop(worker_name: str) -> None:
-    while True:
-        job_id = await job_queue.get()
-        try:
-            await process_job(job_id)
-        finally:
-            job_queue.task_done()
-
-
 async def transcription_worker_loop(worker_name: str) -> None:
     while True:
         job_id = await transcription_job_queue.get()
@@ -795,15 +544,6 @@ async def cleanup_loop() -> None:
         await asyncio.sleep(CLEANUP_INTERVAL_SECONDS)
         cutoff = utcnow() - timedelta(minutes=JOB_TTL_MINUTES)
         stale: list[tuple[str, Path]] = []
-
-        async with jobs_lock:
-            for job_id, job in list(jobs.items()):
-                if job.updated_at > cutoff:
-                    continue
-                if job.status not in {JobStatus.COMPLETED, JobStatus.FAILED}:
-                    continue
-                stale.append((job_id, job.work_dir))
-                jobs.pop(job_id, None)
 
         async with transcription_jobs_lock:
             for job_id, job in list(transcription_jobs.items()):
@@ -824,9 +564,6 @@ async def lifespan(_: FastAPI):
 
     STORAGE_ROOT.mkdir(parents=True, exist_ok=True)
 
-    for index in range(MAX_CONCURRENT_JOBS):
-        worker_tasks.append(asyncio.create_task(worker_loop(f"worker-{index + 1}")))
-
     for index in range(MAX_TRANSCRIPTION_CONCURRENT_JOBS):
         transcription_worker_tasks.append(
             asyncio.create_task(transcription_worker_loop(f"transcription-worker-{index + 1}"))
@@ -837,14 +574,11 @@ async def lifespan(_: FastAPI):
     try:
         yield
     finally:
-        for task in worker_tasks:
-            task.cancel()
         for task in transcription_worker_tasks:
             task.cancel()
         if cleanup_task:
             cleanup_task.cancel()
 
-        await asyncio.gather(*worker_tasks, return_exceptions=True)
         await asyncio.gather(*transcription_worker_tasks, return_exceptions=True)
         if cleanup_task:
             await asyncio.gather(cleanup_task, return_exceptions=True)
@@ -881,7 +615,6 @@ async def audit_log(request: Request, call_next: Any) -> Response:
 
 @app.get("/api/health")
 async def health() -> dict[str, str]:
-    # Minimal response for Render health checks — no internal details exposed.
     return {"status": "ok"}
 
 
@@ -898,8 +631,6 @@ async def health_internal(request: Request) -> dict[str, Any]:
         "status": "ok",
         "yt_dlp": shutil.which("yt-dlp") is not None,
         "ffmpeg": shutil.which("ffmpeg") is not None,
-        "queue_size": job_queue.qsize(),
-        "workers": MAX_CONCURRENT_JOBS,
         "transcription_queue_size": transcription_job_queue.qsize(),
         "transcription_workers": MAX_TRANSCRIPTION_CONCURRENT_JOBS,
         "whisper_available": whisper_error is None,
@@ -909,64 +640,22 @@ async def health_internal(request: Request) -> dict[str, Any]:
     }
 
 
-@app.post("/api/jobs", status_code=202, dependencies=[Depends(rate_limit)])
-async def create_job(payload: CreateJobRequest, request: Request) -> dict[str, Any]:
-    job_id = secrets.token_hex(8)
-    work_dir = STORAGE_ROOT / job_id
-    work_dir.mkdir(parents=True, exist_ok=False)
-    requested_urls = payload.effective_urls()
-    primary_url = requested_urls[0]
+@app.post("/api/resolve", dependencies=[Depends(rate_limit)])
+async def resolve_media(payload: ResolveRequest) -> dict[str, Any]:
+    """
+    Resolve a media URL to a direct CDN stream URL using yt-dlp.
+    The file is never downloaded to the server — the client downloads directly.
+    """
+    try:
+        result = await asyncio.to_thread(
+            run_resolve, payload.url, payload.format, payload.quality
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except subprocess.TimeoutExpired as exc:
+        raise HTTPException(status_code=504, detail="Timed out resolving media URL") from exc
 
-    timestamp = utcnow()
-    job = JobRecord(
-        id=job_id,
-        url=primary_url,
-        urls=requested_urls,
-        output_format=payload.format,
-        quality=payload.quality,
-        work_dir=work_dir,
-        created_at=timestamp,
-        updated_at=timestamp,
-        total_urls=len(requested_urls),
-    )
-
-    async with jobs_lock:
-        jobs[job_id] = job
-
-    await job_queue.put(job_id)
-    return job_to_payload(job, request)
-
-
-@app.get("/api/jobs/{job_id}")
-async def get_job(job_id: str, request: Request) -> dict[str, Any]:
-    async with jobs_lock:
-        job = jobs.get(job_id)
-
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    return job_to_payload(job, request)
-
-
-@app.get("/api/jobs/{job_id}/download")
-async def download_job_file(job_id: str) -> FileResponse:
-    async with jobs_lock:
-        job = jobs.get(job_id)
-
-    if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
-    if job.status is not JobStatus.COMPLETED:
-        raise HTTPException(status_code=409, detail="Job is not complete yet")
-    if not job.file_path or not job.file_path.exists():
-        raise HTTPException(status_code=404, detail="Output file expired or missing")
-
-    media_type = mimetypes.guess_type(job.file_path.name)[0] or "application/octet-stream"
-
-    return FileResponse(
-        path=job.file_path,
-        media_type=media_type,
-        filename=job.filename or job.file_path.name,
-    )
+    return result
 
 
 @app.post("/api/transcriptions/jobs", status_code=202, dependencies=[Depends(rate_limit)])
@@ -1068,6 +757,7 @@ async def download_transcription_job_file(job_id: str) -> FileResponse:
     if not job.file_path or not job.file_path.exists():
         raise HTTPException(status_code=404, detail="Transcription output expired or missing")
 
+    import mimetypes
     media_type = mimetypes.guess_type(job.file_path.name)[0] or "application/octet-stream"
     return FileResponse(
         path=job.file_path,

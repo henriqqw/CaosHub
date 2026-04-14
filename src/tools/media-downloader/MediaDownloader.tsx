@@ -1,32 +1,22 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertTriangle, Download, Link2, Music2, RefreshCw, Video } from 'lucide-react'
+import { AlertTriangle, Download, Link2, Music2, Video } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
-import { ProgressBar } from '../../components/ui/ProgressBar'
 import { ToastContainer } from '../../components/ui/Toast'
 import { useToast } from '../../hooks/useToast'
-import { cn, isSafeDownloadUrl } from '../../lib/utils'
+import { cn, formatBytes } from '../../lib/utils'
 
 type MediaFormat = 'mp4' | 'mp3'
 type QualityPreset = 'low' | 'full'
-type JobStatus = 'queued' | 'processing' | 'completed' | 'failed'
 
-interface JobResponse {
-  id: string
-  status: JobStatus
-  progress: number
-  mode?: 'single' | 'batch'
-  format: MediaFormat
-  quality: QualityPreset
-  filename: string | null
-  error: string | null
-  urls?: string[]
-  total_urls?: number
-  completed_urls?: number
-  created_at: string
-  updated_at: string
-  download_url: string | null
+interface ResolveResult {
+  url: string
+  filename: string
+  ext: string
+  title: string
+  filesize: number | null
+  height: number | null
 }
 
 function normalizeBaseUrl(value: string): string {
@@ -34,9 +24,9 @@ function normalizeBaseUrl(value: string): string {
 }
 
 const envApiBase = (import.meta.env.VITE_MEDIA_API_URL as string | undefined)?.trim()
-const API_BASE_CANDIDATES = envApiBase
-  ? [normalizeBaseUrl(envApiBase)]
-  : ['http://localhost:8000', 'http://localhost:8001']
+const API_BASE = envApiBase
+  ? normalizeBaseUrl(envApiBase)
+  : 'http://localhost:8000'
 
 const FORMAT_OPTIONS: { value: MediaFormat; label: string; icon: React.ReactNode; hint: string }[] = [
   {
@@ -58,240 +48,86 @@ const QUALITY_OPTIONS: { value: QualityPreset; label: string; hint: string }[] =
   { value: 'full', label: 'Full', hint: 'Melhor qualidade disponivel na origem.' },
 ]
 
-function formatStatus(status: JobStatus): string {
-  if (status === 'queued') return 'Na fila'
-  if (status === 'processing') return 'Processando'
-  if (status === 'completed') return 'Concluido'
-  return 'Falhou'
-}
-
-function jobProgress(job: JobResponse): number {
-  if (job.status === 'queued') return 10
-  if (job.status === 'processing') return Math.min(95, Math.max(20, job.progress || 45))
-  return 100
-}
-
-function parseErrorMessage(raw: unknown): string {
-  if (typeof raw === 'string' && raw.trim()) return raw
-  if (raw && typeof raw === 'object') {
-    const detail = (raw as Record<string, unknown>).detail
-    if (typeof detail === 'string' && detail.trim()) return detail
-  }
-  return 'Nao foi possivel concluir a operacao.'
-}
-
-function extractUrls(input: string): string[] {
-  return input
-    .split(/\r?\n/)
-    .map(value => value.trim())
-    .filter(Boolean)
-}
-
 export function MediaDownloader() {
   const [urlInput, setUrlInput] = useState('')
   const [format, setFormat] = useState<MediaFormat>('mp4')
   const [quality, setQuality] = useState<QualityPreset>('full')
-  const [job, setJob] = useState<JobResponse | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [apiBase, setApiBase] = useState<string>(API_BASE_CANDIDATES[0] ?? 'http://localhost:8000')
+  const [isResolving, setIsResolving] = useState(false)
+  const [result, setResult] = useState<ResolveResult | null>(null)
 
   const { toasts, toast, dismiss } = useToast()
-  const previousStatus = useRef<JobStatus | null>(null)
 
-  const selectedFormat = useMemo(() => FORMAT_OPTIONS.find(item => item.value === format), [format])
-  const selectedQuality = useMemo(() => QUALITY_OPTIONS.find(item => item.value === quality), [quality])
-  const parsedUrls = useMemo(() => extractUrls(urlInput), [urlInput])
-
-  const requestApi = useCallback(
-    async (path: string, init?: RequestInit, fallbackOnNotFound = false): Promise<Response> => {
-      const candidates = [apiBase, ...API_BASE_CANDIDATES.filter(candidate => candidate !== apiBase)]
-      let networkError: Error | null = null
-
-      for (const base of candidates) {
-        try {
-          const response = await fetch(`${base}${path}`, init)
-
-          if (fallbackOnNotFound && response.status === 404 && candidates.length > 1) {
-            continue
-          }
-
-          setApiBase(base)
-          return response
-        } catch (error) {
-          if (error instanceof TypeError) {
-            networkError = error
-            continue
-          }
-          throw error
-        }
-      }
-
-      if (networkError) {
-        throw new Error(
-          'Nao foi possivel conectar ao backend. Tente novamente em alguns instantes.',
-        )
-      }
-
-      throw new Error('Backend indisponivel no momento.')
-    },
-    [apiBase],
-  )
-
-  useEffect(() => {
-    let mounted = true
-
-    const probe = async () => {
-      const candidates = [apiBase, ...API_BASE_CANDIDATES.filter(candidate => candidate !== apiBase)]
-
-      for (const base of candidates) {
-        try {
-          const response = await fetch(`${base}/api/health`)
-          if (!response.ok) continue
-          if (!mounted) return
-          setApiBase(base)
-          return
-        } catch {
-          // try next backend candidate
-        }
-      }
-    }
-
-    void probe()
-    return () => {
-      mounted = false
-    }
-  }, [apiBase])
-
-  const fetchJobStatus = useCallback(
-    async (jobId: string, silent = false) => {
-      if (!silent) setIsRefreshing(true)
-      try {
-        const response = await requestApi(`/api/jobs/${jobId}`)
-        const payload = await response.json().catch(() => null)
-
-        if (!response.ok) {
-          throw new Error(parseErrorMessage(payload))
-        }
-
-        setJob(payload as JobResponse)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Erro ao consultar status do job.'
-        toast({ type: 'error', message })
-      } finally {
-        if (!silent) setIsRefreshing(false)
-      }
-    },
-    [requestApi, toast],
-  )
-
-  useEffect(() => {
-    if (!job) return
-    if (job.status === 'completed' || job.status === 'failed') return
-
-    const timer = window.setInterval(() => {
-      void fetchJobStatus(job.id, true)
-    }, 2500)
-
-    return () => {
-      window.clearInterval(timer)
-    }
-  }, [job, fetchJobStatus])
-
-  useEffect(() => {
-    if (!job) {
-      previousStatus.current = null
-      return
-    }
-
-    if (previousStatus.current === job.status) return
-
-    if (job.status === 'completed') {
-      toast({ type: 'success', message: 'Download pronto. Agora e so baixar o arquivo.' })
-    }
-
-    if (job.status === 'failed') {
-      toast({ type: 'error', message: job.error || 'Nao foi possivel processar esse link.' })
-    }
-
-    previousStatus.current = job.status
-  }, [job, toast])
-
-  const startJob = useCallback(async () => {
-    if (parsedUrls.length === 0) {
-      toast({ type: 'warning', message: 'Cole ao menos uma URL antes de iniciar.' })
-      return
-    }
-    if (parsedUrls.length > 25) {
-      toast({ type: 'error', message: 'Limite de 25 URLs por job em lote.' })
-      return
-    }
-
+  const parsedUrl = useMemo(() => {
+    const trimmed = urlInput.trim()
     try {
-      for (const sourceUrl of parsedUrls) {
-        const parsed = new URL(sourceUrl)
-        if (!['http:', 'https:'].includes(parsed.protocol)) {
-          throw new Error('Use URL com http:// ou https://')
-        }
-      }
+      const parsed = new URL(trimmed)
+      return ['http:', 'https:'].includes(parsed.protocol) ? trimmed : null
     } catch {
-      toast({ type: 'error', message: 'Uma ou mais URLs estao invalidas. Verifique os links.' })
-      return
+      return null
     }
+  }, [urlInput])
 
-    setIsSubmitting(true)
+  const canResolve = !!parsedUrl && !isResolving
+
+  const handleResolve = useCallback(async () => {
+    if (!parsedUrl) return
+
+    setIsResolving(true)
+    setResult(null)
+
     try {
-      const body =
-        parsedUrls.length === 1
-          ? { url: parsedUrls[0], format, quality }
-          : { urls: parsedUrls, format, quality }
-
-      const response = await requestApi('/api/jobs', {
+      const response = await fetch(`${API_BASE}/api/resolve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }, true)
+        body: JSON.stringify({ url: parsedUrl, format, quality }),
+      })
 
       const payload = await response.json().catch(() => null)
+
       if (!response.ok) {
-        throw new Error(parseErrorMessage(payload))
+        const detail = payload?.detail ?? 'Nao foi possivel resolver essa URL.'
+        throw new Error(detail)
       }
 
-      setJob(payload as JobResponse)
-      toast({
-        type: 'success',
-        message:
-          parsedUrls.length > 1
-            ? `Job em lote criado (${parsedUrls.length} URLs).`
-            : 'Job criado com sucesso. Processamento iniciado.',
-      })
+      setResult(payload as ResolveResult)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Falha ao criar o job.'
+      const message = error instanceof Error ? error.message : 'Erro ao resolver a URL.'
       toast({ type: 'error', message })
     } finally {
-      setIsSubmitting(false)
+      setIsResolving(false)
     }
-  }, [format, parsedUrls, quality, requestApi, toast])
+  }, [parsedUrl, format, quality, toast])
 
-  const canStart = !isSubmitting && parsedUrls.length > 0
-  const canRefresh = !!job && !isRefreshing
-  const canDownload = !!job?.download_url && job.status === 'completed'
+  const handleDownload = useCallback(() => {
+    if (!result) return
+    const a = document.createElement('a')
+    a.href = result.url
+    a.download = result.filename
+    a.target = '_blank'
+    a.rel = 'noopener noreferrer'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }, [result])
+
+  const selectedFormat = useMemo(() => FORMAT_OPTIONS.find(o => o.value === format), [format])
+  const selectedQuality = useMemo(() => QUALITY_OPTIONS.find(o => o.value === quality), [quality])
 
   return (
     <>
       <Helmet>
         <title>Media Downloader — Baixe vídeos e áudio por URL | CaosHub</title>
-        <meta name="description" content="Cole qualquer URL e baixe como MP4 ou MP3. Suporte a batch com ZIP. Presets de qualidade low e full. Processado via backend com yt-dlp e ffmpeg." />
+        <meta name="description" content="Cole qualquer URL e baixe como MP4 ou MP3. Presets de qualidade low e full. Processado via backend com yt-dlp." />
         <link rel="canonical" href="https://caoshub.vercel.app/tools/media-downloader" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://caoshub.vercel.app/tools/media-downloader" />
         <meta property="og:site_name" content="CaosHub" />
         <meta property="og:title" content="Media Downloader — Baixe vídeos e áudio por URL | CaosHub" />
-        <meta property="og:description" content="Cole qualquer URL e baixe como MP4 ou MP3. Suporte a batch com ZIP. Presets low e full. Processado via backend com yt-dlp e ffmpeg." />
+        <meta property="og:description" content="Cole qualquer URL e baixe como MP4 ou MP3. Presets low e full. Processado via backend com yt-dlp." />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content="https://caoshub.vercel.app/tools/media-downloader" />
         <meta name="twitter:title" content="Media Downloader — Baixe vídeos e áudio por URL | CaosHub" />
-        <meta name="twitter:description" content="Cole qualquer URL e baixe como MP4 ou MP3. Suporte a batch com ZIP. Presets low e full. Processado via backend com yt-dlp e ffmpeg." />
+        <meta name="twitter:description" content="Cole qualquer URL e baixe como MP4 ou MP3. Presets low e full. Processado via backend com yt-dlp." />
       </Helmet>
 
       <motion.div
@@ -309,25 +145,23 @@ export function MediaDownloader() {
           <div>
             <h1 className="text-2xl font-semibold text-text-primary">Media Downloader</h1>
             <p className="text-text-secondary text-sm mt-1">
-              Cole um ou varios links publicos de midia, escolha formato e qualidade, e gere o download.
+              Cole um link publico de midia, escolha formato e qualidade, e baixe diretamente.
             </p>
           </div>
         </div>
 
         <div className="space-y-3 bg-surface border border-border rounded-xl p-4">
           <label htmlFor="media-url" className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-            URLs da midia
+            URL da midia
           </label>
-          <textarea
+          <input
             id="media-url"
+            type="url"
             value={urlInput}
-            onChange={event => setUrlInput(event.target.value)}
-            placeholder={'https://youtube.com/watch?v=...\nhttps://www.tiktok.com/@user/video/...'}
-            className="w-full min-h-28 px-3 py-3 rounded-lg border border-border bg-bg-primary text-sm text-text-primary placeholder:text-text-secondary/60 outline-none focus:border-accent/60 resize-y"
+            onChange={e => { setUrlInput(e.target.value); setResult(null) }}
+            placeholder="https://youtube.com/watch?v=..."
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-bg-primary text-sm text-text-primary placeholder:text-text-secondary/60 outline-none focus:border-accent/60"
           />
-          <p className="text-xs text-text-secondary">
-            Uma URL por linha. Detectadas: <span className="text-text-primary font-medium">{parsedUrls.length}</span>
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,12 +171,14 @@ export function MediaDownloader() {
               {FORMAT_OPTIONS.map(option => (
                 <button
                   key={option.value}
-                  onClick={() => setFormat(option.value)}
+                  onClick={() => { setFormat(option.value); setResult(null) }}
+                  disabled={isResolving}
                   className={cn(
                     'flex items-center justify-between gap-3 px-3 py-2 rounded-lg border text-sm transition-colors duration-150',
                     format === option.value
                       ? 'border-accent bg-accent/10 text-text-primary'
                       : 'border-border bg-bg-primary text-text-secondary hover:border-accent/40 hover:text-text-primary',
+                    isResolving && 'opacity-50 pointer-events-none',
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
@@ -361,12 +197,14 @@ export function MediaDownloader() {
               {QUALITY_OPTIONS.map(option => (
                 <button
                   key={option.value}
-                  onClick={() => setQuality(option.value)}
+                  onClick={() => { setQuality(option.value); setResult(null) }}
+                  disabled={isResolving}
                   className={cn(
                     'flex items-center justify-between gap-3 px-3 py-2 rounded-lg border text-sm transition-colors duration-150',
                     quality === option.value
                       ? 'border-accent bg-accent/10 text-text-primary'
                       : 'border-border bg-bg-primary text-text-secondary hover:border-accent/40 hover:text-text-primary',
+                    isResolving && 'opacity-50 pointer-events-none',
                   )}
                 >
                   <span className="font-medium uppercase tracking-wide">{option.label}</span>
@@ -377,36 +215,12 @@ export function MediaDownloader() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={startJob} disabled={!canStart} loading={isSubmitting}>
-            Gerar download
-          </Button>
-
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setJob(null)
-              previousStatus.current = null
-            }}
-            disabled={!job}
-          >
-            Limpar job
-          </Button>
-
-          <Button
-            variant="ghost"
-            onClick={() => {
-              if (job) void fetchJobStatus(job.id)
-            }}
-            disabled={!canRefresh}
-          >
-            <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
-            Atualizar status
-          </Button>
-        </div>
+        <Button onClick={handleResolve} disabled={!canResolve} loading={isResolving} className="w-full">
+          Resolver link
+        </Button>
 
         <AnimatePresence>
-          {job && (
+          {result && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -414,70 +228,19 @@ export function MediaDownloader() {
               transition={{ duration: 0.2 }}
               className="bg-surface border border-border rounded-xl p-4 space-y-4"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1 min-w-0">
-                  <p className="text-xs text-text-secondary uppercase tracking-wider">Job</p>
-                  <p className="text-sm font-mono text-text-primary break-all">{job.id}</p>
+              <div className="space-y-1">
+                <p className="text-xs text-text-secondary uppercase tracking-wider">Pronto para baixar</p>
+                <p className="text-sm font-medium text-text-primary truncate">{result.title}</p>
+                <div className="flex items-center gap-3 text-xs text-text-secondary">
+                  <span className="uppercase px-1.5 py-0.5 rounded border border-border">{result.ext}</span>
+                  {result.height && <span>{result.height}p</span>}
+                  {result.filesize && <span>{formatBytes(result.filesize)}</span>}
                 </div>
-                <span
-                  className={cn(
-                    'text-xs px-2 py-1 rounded-md border',
-                    job.status === 'completed' && 'border-success/40 text-success',
-                    job.status === 'failed' && 'border-error/40 text-error',
-                    (job.status === 'queued' || job.status === 'processing') && 'border-accent/40 text-accent',
-                  )}
-                >
-                  {formatStatus(job.status)}
-                </span>
               </div>
 
-              <ProgressBar value={jobProgress(job)} label="Progresso" />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-text-secondary">
-                <p>
-                  Modo:{' '}
-                  <span className="text-text-primary font-medium uppercase">
-                    {job.mode === 'batch' ? 'BATCH' : 'SINGLE'}
-                  </span>
-                </p>
-                <p>
-                  Formato: <span className="text-text-primary font-medium uppercase">{job.format}</span>
-                </p>
-                <p>
-                  Qualidade: <span className="text-text-primary font-medium uppercase">{job.quality}</span>
-                </p>
-                <p>
-                  URLs:{' '}
-                  <span className="text-text-primary font-medium">
-                    {job.completed_urls ?? 0}/{job.total_urls ?? 1}
-                  </span>
-                </p>
-                <p className="sm:col-span-2">
-                  Arquivo:{' '}
-                  <span className="text-text-primary font-medium">
-                    {job.filename ?? 'Aguardando geracao do arquivo final...'}
-                  </span>
-                </p>
-              </div>
-
-              {job.error && (
-                <div className="flex items-start gap-2 p-3 rounded-lg border border-error/30 bg-error/5">
-                  <AlertTriangle className="w-4 h-4 text-error shrink-0 mt-0.5" />
-                  <p className="text-sm text-error">{job.error}</p>
-                </div>
-              )}
-
-              <Button
-                onClick={() => {
-                  if (job.download_url && isSafeDownloadUrl(job.download_url, new URL(apiBase).origin)) {
-                    window.location.assign(job.download_url)
-                  }
-                }}
-                disabled={!canDownload}
-                className="w-full"
-              >
+              <Button onClick={handleDownload} className="w-full">
                 <Download className="w-4 h-4" />
-                {job.mode === 'batch' ? 'Baixar ZIP do lote' : 'Baixar arquivo'}
+                Baixar {result.filename}
               </Button>
             </motion.div>
           )}
@@ -493,7 +256,7 @@ export function MediaDownloader() {
 
         <div className="text-xs text-text-secondary space-y-1">
           <p>Preset atual: {selectedFormat?.label} + {selectedQuality?.label}</p>
-          <p>Lote: ate 25 URLs por job, com download final em ZIP.</p>
+          <p>O arquivo e baixado diretamente da origem — sem passar pelo servidor.</p>
           <p>Plataformas suportadas dependem da disponibilidade publica da midia e do yt-dlp.</p>
         </div>
       </motion.div>

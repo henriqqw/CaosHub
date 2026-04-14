@@ -1,0 +1,136 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e4]:
+      - link "Logo YTDown" [ref=e6] [cursor=pointer]:
+        - /url: https://app.ytdown.to/pt23/
+        - generic [ref=e7]:
+          - img "Logo" [ref=e8]
+          - generic [ref=e9]: YTDown
+      - generic [ref=e10]:
+        - list [ref=e11]:
+          - listitem [ref=e12]:
+            - link "Como usar?" [ref=e13] [cursor=pointer]:
+              - /url: https://app.ytdown.to/pt23/how-to-use/
+          - listitem [ref=e14]:
+            - button "Mais" [ref=e15] [cursor=pointer]: Mais
+          - listitem [ref=e17]:
+            - link "YouTube para MP3" [ref=e18] [cursor=pointer]:
+              - /url: https://mp3now.com/
+        - list [ref=e19]:
+          - listitem [ref=e20]:
+            - button "Select language" [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+          - listitem [ref=e26]:
+            - img [ref=e30] [cursor=pointer]
+          - listitem [ref=e32]:
+            - link "Open menu" [ref=e33] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e34]
+  - main [ref=e38]:
+    - generic [ref=e43]:
+      - heading "Baixador de Vídeos do YouTube" [level=1] [ref=e44]
+      - heading "Gratuito Alta Qualidade" [level=2] [ref=e45]
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - textbox "Cole seu link de vídeo do YouTube" [ref=e48]
+          - button "Paste" [ref=e49] [cursor=pointer]:
+            - img [ref=e50]
+            - generic [ref=e52]: Colar
+          - button "Baixar" [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]:
+              - img [ref=e55]
+              - text: Baixar
+        - generic [ref=e58]:
+          - paragraph:
+            - generic: Conteúdo protegido por direitos autorais não está disponível para download com esta ferramenta.
+          - img [ref=e60] [cursor=pointer]
+          - paragraph
+    - generic [ref=e66]:
+      - link:
+        - /url: //chagnougroalry.net/4/10541578/?bnr=1
+    - generic [ref=e70]: "- YTDown é um baixador de vídeos do YouTube gratuito e baseado na web e não é afiliado a nenhum software ou produtos pagos."
+    - generic [ref=e73]:
+      - generic [ref=e74]:
+        - heading "Melhor Downloader do YouTube" [level=3] [ref=e76]:
+          - img [ref=e77]
+          - text: Melhor Downloader do YouTube
+        - generic [ref=e80]:
+          - generic [ref=e81]: O YTDown é um dos melhores baixadores de vídeos do YouTube para os formatos MP3 e MP4. Ele oferece uma ferramenta gratuita e fácil de usar que permite salvar vídeos (até 1080p), Shorts e imagens do YouTube com apenas um clique. Seja para baixar um vídeo em alta resolução, um clipe do YouTube Shorts ou simplesmente salvar uma foto de uma publicação do YouTube, o YTDown torna o processo rápido e simples. Basta inserir o link do YouTube, selecionar a qualidade desejada e baixá-lo diretamente no seu dispositivo.
+          - generic [ref=e82]:
+            - link:
+              - /url: //chagnougroalry.net/4/10571638/?bnr=1
+      - generic [ref=e83]:
+        - heading "Perguntas Frequentes" [level=3] [ref=e85]:
+          - img [ref=e86]
+          - text: Perguntas Frequentes
+        - generic [ref=e90]:
+          - link "1. Onde os downloads são salvos?" [ref=e93] [cursor=pointer]:
+            - /url: "#collapseOne"
+            - strong [ref=e94]: 1. Onde os downloads são salvos?
+          - link "2. Como baixar vídeos do YouTube em MP3?" [ref=e97] [cursor=pointer]:
+            - /url: "#collapseTwo"
+            - strong [ref=e98]: 2. Como baixar vídeos do YouTube em MP3?
+          - link "3. Quanto tempo leva para baixar vídeos usando YTDown?" [ref=e101] [cursor=pointer]:
+            - /url: "#collapseThree"
+            - strong [ref=e102]: 3. Quanto tempo leva para baixar vídeos usando YTDown?
+          - link "4. É seguro baixar vídeos do YouTube com YTDown?" [ref=e105] [cursor=pointer]:
+            - /url: "#collapseFour"
+            - strong [ref=e106]: 4. É seguro baixar vídeos do YouTube com YTDown?
+    - generic [ref=e108]:
+      - heading "Recursos do YTDown" [level=3] [ref=e110]:
+        - img [ref=e111]
+        - text: Recursos do YTDown
+      - generic [ref=e114]:
+        - generic [ref=e115]:
+          - generic [ref=e116]: Baixador de vídeos do YouTube mais rápido
+          - generic [ref=e117]:
+            - text: Baixar vídeos do YouTube nunca foi tão rápido com
+            - strong [ref=e118]: YTDown
+            - text: . Em apenas alguns segundos, você pode salvar seus vídeos favoritos no seu dispositivo sem precisar baixar aplicativos ou criar uma conta.
+        - generic [ref=e119]:
+          - generic [ref=e120]: Baixar vídeos do YouTube para Android e iOS
+          - generic [ref=e121]: Seja você usando Android ou iPhone, YTDown torna o download de vídeos do YouTube simples. Basta colar o URL do vídeo, selecionar seu formato preferido, e seus vídeos serão salvos no seu dispositivo com alguns cliques simples.
+        - generic [ref=e122]:
+          - generic [ref=e123]: Baixar vídeos HD
+          - generic [ref=e124]:
+            - text: YTDown permite que você
+            - strong [ref=e125]: baixe vídeos do YouTube em qualidade HD
+            - text: em segundos. Assista vídeos nítidos e claros a qualquer momento, mesmo quando você não estiver online.
+  - contentinfo [ref=e126]:
+    - generic [ref=e127]:
+      - generic [ref=e128]:
+        - generic [ref=e129]:
+          - paragraph [ref=e131]: YTDown
+          - generic [ref=e132]:
+            - link "Sobre" [ref=e134] [cursor=pointer]:
+              - /url: https://app.ytdown.to/pt23/about/
+            - link "Entre em Contato" [ref=e136] [cursor=pointer]:
+              - /url: https://app.ytdown.to/pt23/contact/
+        - generic [ref=e137]:
+          - paragraph [ref=e139]: Legal
+          - generic [ref=e140]:
+            - link "Como usar?" [ref=e142] [cursor=pointer]:
+              - /url: https://app.ytdown.to/pt23/how-to-use/
+            - link "Política de Privacidade" [ref=e144] [cursor=pointer]:
+              - /url: https://app.ytdown.to/pt23/privacy-policy/
+        - generic [ref=e145]:
+          - paragraph [ref=e147]: Ferramentas
+          - generic [ref=e148]:
+            - link "Baixador de Vídeos do YouTube" [ref=e150] [cursor=pointer]:
+              - /url: https://app.ytdown.to/pt23/
+            - link "DownHub" [ref=e152] [cursor=pointer]:
+              - /url: https://downhub.com
+      - generic [ref=e153]:
+        - paragraph [ref=e154]:
+          - text: YTDown.com o melhor baixador de vídeos do YouTube | © 2024
+          - text: Este serviço não é afiliado ao YouTube. Este site NÃO hospeda nem armazena vídeos em seus servidores.
+        - paragraph
+        - generic [ref=e155]:
+          - button "Facebook" [ref=e157] [cursor=pointer]:
+            - img [ref=e158]
+          - button "X" [ref=e161] [cursor=pointer]:
+            - img [ref=e162]
+          - button "Instagram" [ref=e165] [cursor=pointer]:
+            - img [ref=e166]
+          - button "Reddit" [ref=e173] [cursor=pointer]:
+            - img [ref=e174]
