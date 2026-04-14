@@ -165,6 +165,7 @@ API_TITLE = "CaosHub Media Backend"
 API_VERSION = "0.1.0"
 ALLOWED_ORIGINS = parse_origins(os.getenv("ALLOWED_ORIGINS", "http://localhost:5173"))
 STORAGE_ROOT = Path(os.getenv("STORAGE_ROOT", "./backend/storage")).resolve()
+YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "")
 JOB_TTL_MINUTES = max(5, int(os.getenv("JOB_TTL_MINUTES", "45")))
 MAX_CONCURRENT_JOBS = max(1, int(os.getenv("MAX_CONCURRENT_JOBS", "1")))
 DOWNLOAD_TIMEOUT_SECONDS = max(60, int(os.getenv("DOWNLOAD_TIMEOUT_SECONDS", "1200")))
@@ -230,11 +231,16 @@ def build_ytdlp_command(
         "--no-overwrites",
         "--no-warnings",
         "--restrict-filenames",
+        "--extractor-args",
+        "youtube:player_client=web,mweb,ios",
         "--paths",
         str(work_dir),
         "--output",
         output_template,
     ]
+
+    if YTDLP_COOKIES_FILE:
+        base += ["--cookies", YTDLP_COOKIES_FILE]
 
     if output_format is OutputFormat.MP3:
         audio_quality = "0" if quality is QualityPreset.FULL else "7"
