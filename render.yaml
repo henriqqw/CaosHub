@@ -1,0 +1,31 @@
+﻿services:
+  - type: web
+    name: caoshub-media-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://caoshub.vercel.app,http://localhost:5173
+      - key: JOB_TTL_MINUTES
+        value: 45
+      - key: MAX_CONCURRENT_JOBS
+        value: 1
+      - key: DOWNLOAD_TIMEOUT_SECONDS
+        value: 1200
+      - key: CLEANUP_INTERVAL_SECONDS
+        value: 60
+      - key: MAX_TRANSCRIPTION_FILE_MB
+        value: 500
+      - key: TRANSCRIPTION_TIMEOUT_SECONDS
+        value: 7200
+      - key: MAX_TRANSCRIPTION_CONCURRENT_JOBS
+        value: 1
+      - key: WHISPER_MODEL_SIZE
+        value: small
+      - key: WHISPER_DEVICE
+        value: cpu
+      - key: WHISPER_COMPUTE_TYPE
+        value: int8

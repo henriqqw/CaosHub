@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { FolderArchive } from 'lucide-react'
@@ -29,6 +29,7 @@ export function ImageConverter() {
 
   const doneItems = items.filter(i => i.status === 'done' && i.result)
   const showQuality = outputFormat !== 'png'
+  const prevAllDoneRef = useRef(false)
 
   const downloadAll = async () => {
     if (!doneItems.length) return
@@ -48,6 +49,16 @@ export function ImageConverter() {
       setZipping(false)
     }
   }
+
+  useEffect(() => {
+    const allDone = items.length > 0 && doneItems.length === items.length
+    if (allDone && !prevAllDoneRef.current) {
+      prevAllDoneRef.current = true
+      void downloadAll()
+    }
+    if (!allDone) prevAllDoneRef.current = false
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length, doneItems.length])
 
   return (
     <>

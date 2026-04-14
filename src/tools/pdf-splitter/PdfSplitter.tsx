@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import {
@@ -145,6 +146,11 @@ export function PdfSplitter() {
       toast({ type: 'error', message: `Erro ao criar ZIP: ${msg}` })
     }
   }
+
+  useEffect(() => {
+    if (phase === 'done' && results.length > 0) void handleDownloadAll()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
 
   // Preview how many files range mode will produce
   const rangePreviewCount = (() => {

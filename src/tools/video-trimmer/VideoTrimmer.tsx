@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Timer, Download, AlertTriangle } from 'lucide-react'
@@ -87,6 +87,10 @@ export function VideoTrimmer() {
   const objectUrlRef = useRef<string | null>(null)
 
   const { toasts, toast, dismiss } = useToast()
+
+  useEffect(() => {
+    if (result) downloadBlob(result.blob, result.filename)
+  }, [result])
 
   const handleFiles = useCallback((files: File[]) => {
     const f = files[0]

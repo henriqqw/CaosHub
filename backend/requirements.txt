@@ -1,0 +1,5 @@
+﻿fastapi==0.116.0
+uvicorn[standard]==0.35.0
+yt-dlp
+python-multipart
+faster-whisper

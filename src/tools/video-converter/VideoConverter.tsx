@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clapperboard, Download, AlertTriangle } from 'lucide-react'
@@ -57,6 +57,10 @@ export function VideoConverter() {
   const ffmpegRef = useRef<FFmpeg | null>(null)
   const loadedRef = useRef<boolean>(false)
   const { toasts, toast, dismiss } = useToast()
+
+  useEffect(() => {
+    if (result) downloadBlob(result.blob, result.filename)
+  }, [result])
 
   const handleFiles = useCallback((files: File[]) => {
     const f = files[0]

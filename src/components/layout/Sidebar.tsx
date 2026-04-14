@@ -2,13 +2,36 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Home, FileText, Film, ImageIcon, ImageDown,
-  Palette, QrCode, AlignLeft, KeyRound, FileImage, Scissors,
-  Wand2, SlidersHorizontal, Layers, NotebookPen,
-  Clapperboard, Timer, AudioLines,
+  Home,
+  FileType2,
+  FileText,
+  Film,
+  ImageIcon,
+  ImageDown,
+  Palette,
+  QrCode,
+  AlignLeft,
+  KeyRound,
+  FileImage,
+  Scissors,
+  Wand2,
+  SlidersHorizontal,
+  Layers,
+  NotebookPen,
+  Clapperboard,
+  Timer,
+  AudioLines,
+  Link2,
+  Subtitles,
   Lock,
-  Braces, Hash, KeySquare, Shuffle, Binary,
-  ChevronDown, Menu, X,
+  Braces,
+  Hash,
+  KeySquare,
+  Shuffle,
+  Binary,
+  ChevronDown,
+  Menu,
+  X,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -16,73 +39,90 @@ const categories = [
   {
     label: 'PDF',
     items: [
-      { to: '/tools/merge-pdf',        label: 'MergePDF',        icon: FileText  },
-      { to: '/tools/pdf-to-images',    label: 'PDF → Imagens',   icon: FileImage },
-      { to: '/tools/pdf-splitter',     label: 'Dividir PDF',     icon: Scissors  },
-      { to: '/tools/pdf-protect',      label: 'Proteger PDF',    icon: Lock      },
+      { to: '/tools/pdf-converter', label: 'PDF Converter', icon: FileType2 },
+      { to: '/tools/merge-pdf', label: 'MergePDF', icon: FileText },
+      { to: '/tools/pdf-to-images', label: 'PDF -> Images', icon: FileImage },
+      { to: '/tools/pdf-splitter', label: 'Split PDF', icon: Scissors },
+      { to: '/tools/pdf-protect', label: 'Protect PDF', icon: Lock },
     ],
   },
   {
-    label: 'Imagem',
+    label: 'Image',
     items: [
-      { to: '/tools/image-converter',    label: 'Converter',        icon: ImageIcon        },
-      { to: '/tools/image-compressor',   label: 'Comprimir',        icon: ImageDown        },
-      { to: '/tools/color-palette',      label: 'Paleta',           icon: Palette          },
-      { to: '/tools/background-removal', label: 'Remover Fundo',    icon: Wand2            },
-      { to: '/tools/image-editor',       label: 'Editar',           icon: SlidersHorizontal},
-      { to: '/tools/favicon-generator',  label: 'Favicon',          icon: Layers           },
+      { to: '/tools/image-converter', label: 'Image Converter', icon: ImageIcon },
+      { to: '/tools/image-compressor', label: 'Compress', icon: ImageDown },
+      { to: '/tools/color-palette', label: 'Palette', icon: Palette },
+      { to: '/tools/background-removal', label: 'Remove BG', icon: Wand2 },
+      { to: '/tools/image-editor', label: 'Edit', icon: SlidersHorizontal },
+      { to: '/tools/favicon-generator', label: 'Favicon', icon: Layers },
     ],
   },
   {
-    label: 'Vídeo / Áudio',
+    label: 'Video / Audio',
     items: [
-      { to: '/tools/frame-extractor',  label: 'Frame Extractor',  icon: Film         },
-      { to: '/tools/video-converter',  label: 'Converter Vídeo',  icon: Clapperboard },
-      { to: '/tools/video-trimmer',    label: 'Cortar Vídeo',     icon: Timer        },
-      { to: '/tools/audio-converter',  label: 'Converter Áudio',  icon: AudioLines   },
+      { to: '/tools/frame-extractor', label: 'Frame Extractor', icon: Film },
+      { to: '/tools/video-converter', label: 'Video Converter', icon: Clapperboard },
+      { to: '/tools/video-trimmer', label: 'Video Trimmer', icon: Timer },
+      { to: '/tools/audio-converter', label: 'Audio Converter', icon: AudioLines },
+      { to: '/tools/media-downloader', label: 'Media Downloader', icon: Link2 },
+      { to: '/tools/transcriber', label: 'Transcriber', icon: Subtitles },
     ],
   },
   {
-    label: 'Texto',
+    label: 'Text',
     items: [
-      { to: '/tools/character-counter', label: 'Contador',         icon: AlignLeft    },
-      { to: '/tools/markdown-preview',  label: 'Markdown',         icon: NotebookPen  },
+      { to: '/tools/character-counter', label: 'Counter', icon: AlignLeft },
+      { to: '/tools/markdown-preview', label: 'Markdown', icon: NotebookPen },
     ],
   },
   {
-    label: 'Utilidade',
+    label: 'Utility',
     items: [
-      { to: '/tools/qr-code',            label: 'QR Code',  icon: QrCode   },
-      { to: '/tools/password-generator', label: 'Senhas',   icon: KeyRound },
+      { to: '/tools/qr-code', label: 'QR Code', icon: QrCode },
+      { to: '/tools/password-generator', label: 'Passwords', icon: KeyRound },
     ],
   },
   {
     label: 'Dev',
     items: [
-      { to: '/tools/json-formatter',  label: 'JSON',     icon: Braces   },
-      { to: '/tools/hash-generator',  label: 'Hash',     icon: Hash     },
-      { to: '/tools/jwt-decoder',     label: 'JWT',      icon: KeySquare},
-      { to: '/tools/uuid-generator',  label: 'UUID',     icon: Shuffle  },
-      { to: '/tools/encoder',         label: 'Encoder',  icon: Binary   },
+      { to: '/tools/json-formatter', label: 'JSON', icon: Braces },
+      { to: '/tools/hash-generator', label: 'Hash', icon: Hash },
+      { to: '/tools/jwt-decoder', label: 'JWT', icon: KeySquare },
+      { to: '/tools/uuid-generator', label: 'UUID', icon: Shuffle },
+      { to: '/tools/encoder', label: 'Encoder', icon: Binary },
     ],
   },
 ]
 
+const CORE_TOOL_ROUTES = new Set([
+  '/tools/pdf-converter',
+  '/tools/image-converter',
+  '/tools/media-downloader',
+  '/tools/transcriber',
+  '/tools/video-converter',
+  '/tools/audio-converter',
+  '/tools/merge-pdf',
+  '/tools/image-compressor',
+  '/tools/background-removal',
+  '/tools/qr-code',
+  '/tools/password-generator',
+])
+
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+  const [showAllTools, setShowAllTools] = useState(false)
 
-  const toggle = (label: string) =>
+  const toggle = (label: string) => {
     setCollapsed(prev => ({ ...prev, [label]: !prev[label] }))
+  }
 
   return (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="flex items-center justify-between px-4 h-14 border-b border-border shrink-0">
         <NavLink to="/" className="flex items-center gap-2" onClick={onClose}>
           <div className="w-6 h-6 flex items-center justify-center rounded-md bg-accent/10 border border-accent/20">
             <svg viewBox="0 0 32 32" className="w-3.5 h-3.5">
-              <path d="M 23 11 A 8.5 8.5 0 1 0 23 21"
-                stroke="#FF2222" strokeWidth="4" fill="none" strokeLinecap="round" />
+              <path d="M 23 11 A 8.5 8.5 0 1 0 23 21" stroke="#FF2222" strokeWidth="4" fill="none" strokeLinecap="round" />
             </svg>
           </div>
           <span className="text-sm font-bold text-text-primary tracking-tight">CaosHub</span>
@@ -94,9 +134,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-        {/* Home */}
         <NavLink
           to="/"
           end
@@ -114,22 +152,39 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           Home
         </NavLink>
 
-        {/* Divider */}
         <div className="h-px bg-border my-2 mx-1" />
 
-        {/* Categories */}
+        <button
+          onClick={() => setShowAllTools(prev => !prev)}
+          className={cn(
+            'w-full text-left px-3 py-2 mb-2 rounded-lg text-xs font-semibold uppercase tracking-widest transition-colors',
+            showAllTools
+              ? 'border border-border text-text-secondary hover:text-text-primary hover:border-accent/40'
+              : 'border border-accent/30 bg-accent/10 text-accent hover:bg-accent/15',
+          )}
+        >
+          {showAllTools ? 'Focus mode (core tools)' : 'Show all tools'}
+        </button>
+
         {categories.map(cat => (
-          <div key={cat.label}>
+          (() => {
+            const visibleItems = showAllTools
+              ? cat.items
+              : cat.items.filter(item => CORE_TOOL_ROUTES.has(item.to))
+
+            if (visibleItems.length === 0) {
+              return null
+            }
+
+            return (
+              <div key={cat.label}>
             <button
               onClick={() => toggle(cat.label)}
               className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-semibold text-text-secondary uppercase tracking-widest hover:text-text-primary transition-colors duration-150"
             >
               {cat.label}
               <ChevronDown
-                className={cn(
-                  'w-3 h-3 transition-transform duration-150',
-                  collapsed[cat.label] ? '-rotate-90' : '',
-                )}
+                className={cn('w-3 h-3 transition-transform duration-150', collapsed[cat.label] ? '-rotate-90' : '')}
               />
             </button>
 
@@ -142,7 +197,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                   transition={{ duration: 0.15 }}
                   className="overflow-hidden"
                 >
-                  {cat.items.map(({ to, label, icon: Icon }) => (
+                  {visibleItems.map(({ to, label, icon: Icon }) => (
                     <NavLink
                       key={to}
                       to={to}
@@ -163,19 +218,18 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+              </div>
+            )
+          })()
         ))}
       </nav>
 
-      {/* Footer */}
       <div className="px-4 py-3 border-t border-border shrink-0">
-        <p className="text-[11px] text-text-secondary/50">MIT License · Open Source</p>
+        <p className="text-[11px] text-text-secondary/50">MIT License - Open Source</p>
       </div>
     </div>
   )
 }
-
-// ─── Mobile overlay ──────────────────────────────────────────────────────────
 
 export function MobileSidebar() {
   const [open, setOpen] = useState(false)
@@ -215,8 +269,6 @@ export function MobileSidebar() {
     </>
   )
 }
-
-// ─── Desktop sidebar ─────────────────────────────────────────────────────────
 
 export function DesktopSidebar() {
   return (

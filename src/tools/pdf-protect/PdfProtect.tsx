@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Lock, FileText, ShieldCheck } from 'lucide-react'
@@ -35,6 +35,12 @@ export function PdfProtect() {
   const [resultBlob, setResultBlob] = useState<Blob | null>(null)
   const [resultSize, setResultSize] = useState<number>(0)
   const { toasts, toast, dismiss } = useToast()
+
+  useEffect(() => {
+    if (resultBlob && file) {
+      downloadBlob(resultBlob, file.name.replace(/\.pdf$/i, '-protected.pdf'))
+    }
+  }, [resultBlob])
 
   const strength = getStrength(userPassword)
   const cfg = strengthConfig[strength]

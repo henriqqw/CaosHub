@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { FileImage, Download, RotateCcw, Image, Archive } from 'lucide-react'
@@ -92,6 +93,11 @@ export function PdfToImages() {
       toast({ type: 'error', message: `Erro ao criar ZIP: ${msg}` })
     }
   }
+
+  useEffect(() => {
+    if (phase === 'done' && images.length > 0) void handleDownloadAll()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
 
   const scaleOptions: { value: number; label: string }[] = [
     { value: 1, label: '1×' },

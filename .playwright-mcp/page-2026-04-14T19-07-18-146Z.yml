@@ -1,0 +1,129 @@
+- generic [ref=e3]:
+  - button [ref=e4]:
+    - img [ref=e5]
+  - generic [ref=e6]:
+    - main [ref=e7]:
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - img [ref=e85]
+          - generic [ref=e88]:
+            - heading "Transcriber (Whisper)" [level=1] [ref=e89]
+            - paragraph [ref=e90]: Upload media to generate transcript TXT and subtitle SRT automatically.
+        - generic [ref=e91]:
+          - generic [ref=e93] [cursor=pointer]:
+            - img [ref=e94]
+            - generic [ref=e97]:
+              - paragraph [ref=e98]: Drop audio/video file here
+              - paragraph [ref=e99]: "Supported: MP3, WAV, M4A, MP4, MOV, MKV, WebM and more"
+          - generic [ref=e119]: "File: tmp-tone.wav (86.2 KB)"
+          - generic [ref=e100]:
+            - text: Requested language (optional)
+            - button "Detectar Automaticamente auto" [ref=e101]:
+              - generic [ref=e102]:
+                - img [ref=e103]
+                - generic [ref=e107]:
+                  - paragraph [ref=e108]: Detectar Automaticamente
+                  - paragraph [ref=e109]: auto
+              - img [ref=e110]
+            - paragraph [ref=e112]: Auto detect usually works well. Manually select a language for better accuracy.
+          - paragraph [ref=e113]: "Backend: http://localhost:8001"
+        - generic [ref=e114]:
+          - button "Start transcription" [ref=e120] [cursor=pointer]
+          - button "Clear job" [disabled]
+          - button "Refresh status" [disabled]:
+            - img
+            - text: Refresh status
+        - generic [ref=e115]:
+          - img [ref=e116]
+          - paragraph [ref=e118]: Use only content you are authorized to process. Very large files can take longer.
+    - contentinfo [ref=e10]:
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - img [ref=e16]
+            - generic [ref=e18]: CaosHub
+          - paragraph [ref=e19]: Open source project - MIT License
+        - generic [ref=e20]:
+          - heading "Tools" [level=3] [ref=e21]
+          - navigation [ref=e22]:
+            - link "PDF Converter" [ref=e23] [cursor=pointer]:
+              - /url: /tools/pdf-converter
+            - link "MergePDF" [ref=e24] [cursor=pointer]:
+              - /url: /tools/merge-pdf
+            - link "PDF to Images" [ref=e25] [cursor=pointer]:
+              - /url: /tools/pdf-to-images
+            - link "Split PDF" [ref=e26] [cursor=pointer]:
+              - /url: /tools/pdf-splitter
+            - link "Protect PDF" [ref=e27] [cursor=pointer]:
+              - /url: /tools/pdf-protect
+            - link "Image Converter" [ref=e28] [cursor=pointer]:
+              - /url: /tools/image-converter
+            - link "Image Compressor" [ref=e29] [cursor=pointer]:
+              - /url: /tools/image-compressor
+            - link "Color Palette" [ref=e30] [cursor=pointer]:
+              - /url: /tools/color-palette
+            - link "Remove Background" [ref=e31] [cursor=pointer]:
+              - /url: /tools/background-removal
+            - link "Image Editor" [ref=e32] [cursor=pointer]:
+              - /url: /tools/image-editor
+            - link "Favicon Generator" [ref=e33] [cursor=pointer]:
+              - /url: /tools/favicon-generator
+            - link "Frame Extractor" [ref=e34] [cursor=pointer]:
+              - /url: /tools/frame-extractor
+            - link "Video Converter" [ref=e35] [cursor=pointer]:
+              - /url: /tools/video-converter
+            - link "Video Trimmer" [ref=e36] [cursor=pointer]:
+              - /url: /tools/video-trimmer
+            - link "Audio Converter" [ref=e37] [cursor=pointer]:
+              - /url: /tools/audio-converter
+            - link "Media Downloader" [ref=e38] [cursor=pointer]:
+              - /url: /tools/media-downloader
+            - link "Transcriber" [ref=e39] [cursor=pointer]:
+              - /url: /tools/transcriber
+            - link "Character Counter" [ref=e40] [cursor=pointer]:
+              - /url: /tools/character-counter
+            - link "Markdown Preview" [ref=e41] [cursor=pointer]:
+              - /url: /tools/markdown-preview
+            - link "QR Code" [ref=e42] [cursor=pointer]:
+              - /url: /tools/qr-code
+            - link "Password Generator" [ref=e43] [cursor=pointer]:
+              - /url: /tools/password-generator
+            - link "JSON Formatter" [ref=e44] [cursor=pointer]:
+              - /url: /tools/json-formatter
+            - link "Hash Generator" [ref=e45] [cursor=pointer]:
+              - /url: /tools/hash-generator
+            - link "JWT Decoder" [ref=e46] [cursor=pointer]:
+              - /url: /tools/jwt-decoder
+            - link "UUID Generator" [ref=e47] [cursor=pointer]:
+              - /url: /tools/uuid-generator
+            - link "Encoder" [ref=e48] [cursor=pointer]:
+              - /url: /tools/encoder
+        - generic [ref=e49]:
+          - heading "Links" [level=3] [ref=e50]
+          - generic [ref=e51]:
+            - link "GitHub" [ref=e52] [cursor=pointer]:
+              - /url: https://github.com/henriqqw/CaosHub
+              - img [ref=e53]
+            - link "Twitter" [ref=e56] [cursor=pointer]:
+              - /url: https://twitter.com/caosdev
+              - img [ref=e57]
+            - link "Discord" [ref=e59] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e60]
+            - link "Instagram" [ref=e62] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e63]
+            - link "LinkedIn" [ref=e66] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e67]
+            - link "Email" [ref=e71] [cursor=pointer]:
+              - /url: mailto:contato@caosdev.com
+              - img [ref=e72]
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - text: Made with
+          - img [ref=e78]
+          - text: by
+          - link "caosdev" [ref=e80] [cursor=pointer]:
+            - /url: https://caosdev.vercel.app
+        - paragraph [ref=e81]: Most tools run locally in your browser. Media Downloader and Transcriber use backend services.

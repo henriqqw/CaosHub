@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wand2, Download, Trash2, Upload } from 'lucide-react'
@@ -28,6 +28,13 @@ export function BackgroundRemoval() {
   const [customColor, setCustomColor] = useState('#ffffff')
   const fileRef = useRef<File | null>(null)
   const { toasts, toast, dismiss } = useToast()
+
+  useEffect(() => {
+    if (resultBlob) {
+      const name = (fileRef.current?.name ?? 'image').replace(/\.[^.]+$/, '') + '.png'
+      downloadBlob(resultBlob, name)
+    }
+  }, [resultBlob])
 
   const processFile = async (file: File) => {
     if (originalUrl) URL.revokeObjectURL(originalUrl)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Layers, Download } from 'lucide-react'
@@ -49,6 +49,18 @@ export function FaviconGenerator() {
   const [generating, setGenerating] = useState<boolean>(false)
   const [downloadingZip, setDownloadingZip] = useState<boolean>(false)
   const { toasts, toast, dismiss } = useToast()
+
+  useEffect(() => {
+    if (results.length === 0) return
+    void (async () => {
+      const zip = new JSZip()
+      for (const r of results) {
+        zip.file(`favicon-${r.size}x${r.size}.png`, r.blob)
+      }
+      const zipBlob = await zip.generateAsync({ type: 'blob' })
+      downloadBlob(zipBlob, 'favicons.zip')
+    })()
+  }, [results])
 
   function handleFiles(files: File[]) {
     const file = files[0]
