@@ -9,7 +9,7 @@ import { ProgressBar } from '../../components/ui/ProgressBar'
 import { ToastContainer } from '../../components/ui/Toast'
 import { useToast } from '../../hooks/useToast'
 import { cn, dataUrlToBlob, downloadBlob, formatBytes } from '../../lib/utils'
-import { renderPdfPages, type ImageFormat } from '../pdf-to-images/utils/pdfToImages'
+import { renderPdfPages, type ImageFormat } from './utils/pdfToImages'
 
 type OutputFormat = 'png' | 'jpeg' | 'webp'
 type QualityPreset = 'low' | 'balanced' | 'full'
@@ -126,7 +126,7 @@ export function PdfConverter() {
         jpegQuality,
         presetToScale(quality),
         undefined,
-        (current, total) => {
+        (current: number, total: number) => {
           const currentProgress = 5 + Math.round((current / Math.max(total, 1)) * 60)
           setProgress(Math.max(5, Math.min(70, currentProgress)))
         },
