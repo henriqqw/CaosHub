@@ -328,9 +328,6 @@ export function MediaDownloader() {
           <p className="text-xs text-text-secondary">
             Uma URL por linha. Detectadas: <span className="text-text-primary font-medium">{parsedUrls.length}</span>
           </p>
-          <p className="text-xs text-text-secondary">
-            Backend: <span className="text-text-primary font-medium">{apiBase}</span>
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
